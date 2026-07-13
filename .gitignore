@@ -1,0 +1,41 @@
+# Git Ignore configuration for PlateLink Backend
+
+# Exclude Frontend Repository
+/platelink-frontend/
+
+# Local Environment Variables
+.env
+.env.local
+.env.sync
+
+# Python Caches & Compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.hypothesis/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+bin/
+lib/
+include/
+pip-selfcheck.json
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker and Compose local files
+.docker/
+
+# OS/IDE configs
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini

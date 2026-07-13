@@ -1,0 +1,66 @@
+# Dockerfile
+FROM python:3.11-slim as base
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements/base.txt .
+RUN pip install --no-cache-dir -r base.txt
+
+COPY . .
+
+# Production stage
+FROM base as prod
+RUN pip install gunicorn
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-c", "gunicorn_conf.py", "app.main:app"]
+
+# docker-compose.yml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  redis:
+    image: redis:7-alpine
+
+  backend:
+    build: .
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: .
+    command: celery -A app.core.celery_app worker --loglevel=info
+    depends_on:
+      - redis
+      - db
+
+  beat:
+    build: .
+    command: celery -A app.core.celery_app beat --loglevel=info
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  postgres_data:
