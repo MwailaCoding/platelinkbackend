@@ -21,13 +21,28 @@ class Restaurant(Base):
     logo_url: Mapped[Optional[str]] = mapped_column(Text)
     prefix: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_onboarded: Mapped[bool] = mapped_column(Boolean, default=False)
-    status: Mapped[SubscriptionStatus] = mapped_column(PG_ENUM(SubscriptionStatus, name="subscription_status_enum"), default=SubscriptionStatus.trial)
+    # is_onboarded does not exist in DB yet — added as Optional so queries don't fail
+    # Run: ALTER TABLE restaurants ADD COLUMN is_onboarded BOOLEAN NOT NULL DEFAULT FALSE;
+    is_onboarded: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=False)
+    # DB column is named 'subscription_status', not 'status'
+    subscription_status: Mapped[SubscriptionStatus] = mapped_column(
+        PG_ENUM(SubscriptionStatus, name="subscription_status_enum"),
+        default=SubscriptionStatus.trial,
+        server_default="'trial'::subscription_status_enum",
+    )
     subscription_plan: Mapped[SubscriptionPlan] = mapped_column(PG_ENUM(SubscriptionPlan, name="subscription_plan_enum"), default=SubscriptionPlan.starter)
     trial_ends_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    # Extra DB columns not in original model
+    parent_restaurant_id: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True)
+    is_multi_branch: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=False)
+    subscription_ends_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    business_registration: Mapped[Optional[str]] = mapped_column(Text)
+    kra_pin: Mapped[Optional[str]] = mapped_column(Text)
+    city: Mapped[Optional[str]] = mapped_column(Text)
+    deleted_by: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True)
 
     # Relationships
     staff: Mapped[List["Staff"]] = relationship(back_populates="restaurant", cascade="all, delete-orphan")
