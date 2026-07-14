@@ -1,21 +1,23 @@
 # app/main.py
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.api.v1.api import api_router
 from app.api.v1.routes.payments import router as payments_router
 from app.api.v1.routes.webhooks import router as webhooks_router
 from app.services.pesapal_service import PesapalService
 import logging
+import time
 from app.db.session import engine
 from redis.asyncio import Redis
 from sqlalchemy import text
-from app.middleware.logging import RequestLoggingMiddleware
 from app.api.v1.websockets.connection_manager import manager
 
 logger = logging.getLogger("uvicorn.error")
 pesapal_service = PesapalService()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,7 +25,7 @@ async def lifespan(app: FastAPI):
     print("\n" + "="*50)
     print("PLATELINK AFRICA BACKEND STARTING UP")
     print("="*50)
-    
+
     # 1. Check Database
     try:
         async with engine.connect() as conn:
@@ -31,7 +33,7 @@ async def lifespan(app: FastAPI):
         logger.info("Database Connection: STABLE")
     except Exception as e:
         logger.error(f"Database Connection: FAILED -> {e}")
-        
+
     # 2. Check Redis
     try:
         redis = Redis.from_url(settings.REDIS_URL)
@@ -50,10 +52,11 @@ async def lifespan(app: FastAPI):
             logger.warning("Pesapal credentials not configured. Skipping startup IPN registration.")
     except Exception as e:
         logger.error(f"Pesapal Webhook IPN registration failed on startup: {e}")
-        
+
     print("="*50 + "\n")
     yield
     # Shutdown: Close connections
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -61,12 +64,27 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Parse ALLOWED_ORIGINS: "*" stays as-is; comma-separated URLs become a list
+# ---------------------------------------------------------------------------
+# CORS
+# ---------------------------------------------------------------------------
+# Parse ALLOWED_ORIGINS: "*" stays as-is; comma-separated URLs become a list.
+# Always include common localhost dev ports so local frontend can reach Render.
 _raw_origins = settings.ALLOWED_ORIGINS.strip()
-_allowed_origins = ["*"] if _raw_origins == "*" else [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
+if _raw_origins == "*":
+    _allowed_origins = ["*"]
+else:
+    _explicit = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+    _dev_origins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
+    ]
+    _allowed_origins = list(set(_explicit + _dev_origins))
 
 # NOTE: allow_credentials=True is incompatible with allow_origins=["*"] per the CORS spec.
-# When origins is "*", we must set allow_credentials=False. Use explicit origins for credentialed requests.
+# When origins is "*", browsers block credentialed requests. Use explicit origins for that.
 _allow_credentials = _allowed_origins != ["*"]
 
 app.add_middleware(
@@ -76,14 +94,43 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(RequestLoggingMiddleware)
 
-# Standard API routers
+# ---------------------------------------------------------------------------
+# IMPORTANT: Do NOT add BaseHTTPMiddleware subclasses (e.g. RequestLoggingMiddleware).
+# Starlette's BaseHTTPMiddleware has a known bug where it swallows unhandled
+# exceptions and returns a plain "Internal Server Error" response that bypasses
+# CORSMiddleware — stripping all Access-Control-Allow-Origin headers.
+# Use @app.middleware("http") or exception_handler instead.
+# ---------------------------------------------------------------------------
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Lightweight ASGI request logger that does not interfere with error responses."""
+    start = time.time()
+    response = await call_next(request)
+    duration = time.time() - start
+    logger.info(
+        f"{request.method} {request.url.path} -> {response.status_code} ({duration:.3f}s)"
+    )
+    return response
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Catch-all handler: returns a JSON 500 so CORSMiddleware can still add headers."""
+    logger.exception(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error. Please try again later."},
+    )
+
+# ---------------------------------------------------------------------------
+# Routers
+# ---------------------------------------------------------------------------
 app.include_router(api_router, prefix=settings.API_V1_STR)
-
-# Explicit payment and webhook routers for fallback integration
 app.include_router(payments_router, prefix="/api/v1", tags=["Payments"])
 app.include_router(webhooks_router, prefix="/api/v1", tags=["Webhooks"])
+
 
 @app.get("/health", tags=["Health"])
 async def health_check():
@@ -100,7 +147,7 @@ async def payments_health():
             pesapal_status = "healthy" if token else "error"
         except Exception as e:
             pesapal_status = f"unhealthy: {str(e)}"
-            
+
     mpesa_status = "configured"
     if not settings.MPESA_CONSUMER_KEY or settings.MPESA_CONSUMER_KEY == "placeholder":
         mpesa_status = "unconfigured"
@@ -112,6 +159,7 @@ async def payments_health():
             "mpesa": mpesa_status
         }
     }
+
 
 @app.websocket("/ws/payment/{transaction_id}")
 async def websocket_payment_endpoint(websocket: WebSocket, transaction_id: str):
@@ -125,6 +173,7 @@ async def websocket_payment_endpoint(websocket: WebSocket, transaction_id: str):
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)
 
+
 @app.websocket("/ws/{restaurant_id}/{role}")
 async def websocket_endpoint(websocket: WebSocket, restaurant_id: str, role: str):
     room_id = f"{restaurant_id}_{role}"
@@ -132,7 +181,6 @@ async def websocket_endpoint(websocket: WebSocket, restaurant_id: str, role: str
     try:
         while True:
             data = await websocket.receive_text()
-            # Handle heartbeat
             if data == "ping":
                 await websocket.send_text("pong")
     except WebSocketDisconnect:
