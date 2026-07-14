@@ -18,7 +18,7 @@ def generate_qr_token(table_id: str, restaurant_id: str) -> str:
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
 
-def generate_qr_image(token: str, logo: Image.Image = None) -> Image.Image:
+def generate_qr_image(token: str, restaurant_slug: str, logo: Image.Image = None) -> Image.Image:
     """
     Generate a styled QR code image with an optional centered logo.
     Uses High Error Correction (ERROR_CORRECT_H) to allow logo overlay.
@@ -29,7 +29,7 @@ def generate_qr_image(token: str, logo: Image.Image = None) -> Image.Image:
         box_size=10,
         border=2
     )
-    qr.add_data(f"https://order.platelink.com/t/{token}")
+    qr.add_data(f"https://platelink-customer.vercel.app/{restaurant_slug}/menu/{token}")
     qr.make(fit=True)
     
     img = qr.make_image(fill_color="black", back_color="white").convert('RGB')

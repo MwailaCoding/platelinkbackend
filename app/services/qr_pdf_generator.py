@@ -77,8 +77,9 @@ class TableCard(Flowable):
         canvas.drawCentredString(110, 20, f"TABLE {self.table_number}")
 
 class QRPDFGenerator:
-    def __init__(self, restaurant_name: str, restaurant_logo: bytes = None):
+    def __init__(self, restaurant_name: str, restaurant_slug: str, restaurant_logo: bytes = None):
         self.restaurant_name = restaurant_name
+        self.restaurant_slug = restaurant_slug
         
         # Load or generate logo image
         if restaurant_logo:
@@ -134,7 +135,7 @@ class QRPDFGenerator:
     def generate_qr_code(self, table_number: int, token: str) -> Image.Image:
         """Generate QR code with URL and embed centered logo."""
         from app.utils.qr_utils import generate_qr_image
-        return generate_qr_image(token, self.logo)
+        return generate_qr_image(token, self.restaurant_slug, self.logo)
 
     def create_table_card(self, qr_img: Image.Image, table_number: int) -> Flowable:
         """Returns a custom Flowable representing the card."""

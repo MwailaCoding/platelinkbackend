@@ -26,27 +26,34 @@ async def list_tables(current_user: Staff = Depends(get_current_user), db: Async
     result = await db.execute(stmt)
     return result.scalars().all()
 
-async def generate_table_qr_img(restaurant_id: str, table_id: str, table_number: int):
+async def generate_table_qr_img(restaurant_id: str, restaurant_slug: str, table_id: str, table_number: int):
     from datetime import timedelta
     token = security.create_access_token(
         subject=str(table_id),
         expires_delta=timedelta(days=3650),
         extra_claims={"type": "table", "restaurant_id": str(restaurant_id), "table_number": table_number}
     )
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(token)
+    qr = qrcode.QRCode(
+        version=4,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=5
+    )
+    qr.add_data(f"https://platelink-customer.vercel.app/{restaurant_slug}/menu/{token}")
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     return token, img
 
 @router.post("/bulk-create")
 async def bulk_create_tables(data: schemas.TableBulkCreate, current_user: Staff = Depends(check_role(["owner", "manager"])), db: AsyncSession = Depends(get_db)):
+    rest = await db.get(Restaurant, current_user.restaurant_id)
+    restaurant_slug = rest.slug if rest else "restaurant"
     for num in range(data.start_number, data.end_number + 1):
         stmt = select(Table).where(Table.restaurant_id == current_user.restaurant_id, Table.table_number == num)
         if (await db.execute(stmt)).scalar(): continue
         new_table = Table(restaurant_id=current_user.restaurant_id, table_number=num, capacity=data.capacity, location=data.location, status=TableStatus.available)
         db.add(new_table); await db.flush()
-        token, img = await generate_table_qr_img(current_user.restaurant_id, new_table.id, num)
+        token, img = await generate_table_qr_img(current_user.restaurant_id, restaurant_slug, new_table.id, num)
         buf = io.BytesIO(); img.save(buf, format="PNG")
         url = await CloudinaryService.upload_image(buf.getvalue(), folder="qr_codes")
         new_table.qr_code_token = token
@@ -85,7 +92,7 @@ async def download_qr_codes(
     if has_new_tokens:
         await db.commit()
         
-    generator = QRPDFGenerator(restaurant_name=rest.name)
+    generator = QRPDFGenerator(restaurant_name=rest.name, restaurant_slug=rest.slug)
     pdf_bytes = generator.generate_pdf(table_dicts)
     
     buffer = io.BytesIO(pdf_bytes)
