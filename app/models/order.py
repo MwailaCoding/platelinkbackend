@@ -27,7 +27,7 @@ class Order(Base):
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     customer_phone: Mapped[Optional[str]] = mapped_column(Text)
     notes: Mapped[Optional[str]] = mapped_column(Text)  # was 'waiter_notes' in old model
-    delivery_fee: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2))
+    delivery_fee: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0.00, server_default="0.00", nullable=False)
     customer_rating: Mapped[Optional[int]] = mapped_column(Integer)
     branch_id: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
