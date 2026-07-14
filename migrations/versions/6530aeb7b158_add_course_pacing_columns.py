@@ -90,36 +90,35 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['transferred_by'], ['staff.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.drop_table('kitchen_stations')
-    op.drop_table('station_prep_times')
     op.drop_table('table_transfers')
-    op.drop_table('kitchen_routing_rules')
     op.drop_table('item_transfers')
-    op.drop_table('kitchen_display_settings')
+
+    # Create enums if they do not exist
+    subscription_status_enum = postgresql.ENUM('trial', 'active', 'suspended', 'cancelled', name='subscription_status_enum')
+    subscription_status_enum.create(op.get_bind(), checkfirst=True)
+
+    shift_type_enum = postgresql.ENUM('morning', 'afternoon', 'evening', 'night', 'full', name='shift_type_enum')
+    shift_type_enum.create(op.get_bind(), checkfirst=True)
+
+    call_type_enum = postgresql.ENUM('assistance', 'water', 'bill', 'other', name='call_type_enum')
+    call_type_enum.create(op.get_bind(), checkfirst=True)
+
+    call_status_enum = postgresql.ENUM('pending', 'acknowledged', 'completed', name='call_status_enum')
+    call_status_enum.create(op.get_bind(), checkfirst=True)
     op.add_column('categories', sa.Column('description', sa.Text(), nullable=True))
     op.add_column('categories', sa.Column('image_url', sa.Text(), nullable=True))
     op.add_column('categories', sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
     op.add_column('categories', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
-    op.drop_column('categories', 'is_active')
     op.add_column('customer_sessions', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
     op.drop_column('customer_sessions', 'order_number')
     op.drop_column('customer_sessions', 'device_fingerprint')
     op.add_column('menu_item_modifiers', sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
     op.add_column('menu_item_modifiers', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
-    op.add_column('menu_items', sa.Column('is_vegetarian', sa.Boolean(), nullable=False))
-    op.add_column('menu_items', sa.Column('is_spicy', sa.Boolean(), nullable=False))
+    op.add_column('menu_items', sa.Column('is_vegetarian', sa.Boolean(), server_default=sa.text('false'), nullable=False))
+    op.add_column('menu_items', sa.Column('is_spicy', sa.Boolean(), server_default=sa.text('false'), nullable=False))
     op.add_column('menu_items', sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
     op.add_column('menu_items', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
-    op.alter_column('menu_items', 'dietary_info',
-               existing_type=postgresql.JSONB(astext_type=sa.Text()),
-               type_=sa.Text(),
-               existing_nullable=True)
-    op.drop_constraint('fk_menu_items_station_id', 'menu_items', type_='foreignkey')
-    op.drop_column('menu_items', 'is_popular')
-    op.drop_column('menu_items', 'is_active')
-    op.drop_column('menu_items', 'station_id')
     op.add_column('order_item_modifiers', sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
-    op.add_column('order_items', sa.Column('order_created_at', sa.DateTime(timezone=True), nullable=False))
     op.add_column('order_items', sa.Column('served_at', sa.DateTime(timezone=True), nullable=True))
     op.add_column('order_items', sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
     op.add_column('order_items', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
@@ -139,10 +138,8 @@ def upgrade() -> None:
                existing_type=sa.VARCHAR(length=255),
                type_=sa.Text(),
                existing_nullable=True)
-    op.drop_constraint('order_items_order_id_fkey', 'order_items', type_='foreignkey')
-    op.create_foreign_key(None, 'order_items', 'orders', ['order_id', 'order_created_at'], ['id', 'created_at'], ondelete='CASCADE')
     op.add_column('orders', sa.Column('notes', sa.Text(), nullable=True))
-    op.add_column('orders', sa.Column('delivery_fee', sa.Numeric(precision=10, scale=2), nullable=False))
+    op.add_column('orders', sa.Column('delivery_fee', sa.Numeric(precision=10, scale=2), server_default='0.00', nullable=False))
     op.add_column('orders', sa.Column('customer_rating', sa.Integer(), nullable=True))
     op.add_column('orders', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
     op.alter_column('orders', 'order_number',
@@ -162,7 +159,7 @@ def upgrade() -> None:
     op.add_column('restaurants', sa.Column('business_registration', sa.Text(), nullable=True))
     op.add_column('restaurants', sa.Column('kra_pin', sa.Text(), nullable=True))
     op.add_column('restaurants', sa.Column('city', sa.Text(), nullable=True))
-    op.add_column('restaurants', sa.Column('subscription_status', postgresql.ENUM('trial', 'active', 'suspended', 'cancelled', name='subscription_status_enum'), nullable=False))
+    op.add_column('restaurants', sa.Column('subscription_status', postgresql.ENUM('trial', 'active', 'suspended', 'cancelled', name='subscription_status_enum'), server_default='trial', nullable=False))
     op.add_column('restaurants', sa.Column('deleted_by', sa.UUID(), nullable=True))
     op.create_foreign_key('fk_restaurants_deleted_by', 'restaurants', 'staff', ['deleted_by'], ['id'], ondelete='SET NULL', use_alter=True)
     op.drop_column('restaurants', 'is_onboarded')
@@ -173,12 +170,18 @@ def upgrade() -> None:
                existing_type=sa.BOOLEAN(),
                nullable=False,
                existing_server_default=sa.text('false'))
-    op.drop_constraint('fk_staff_kitchen_station_id', 'staff', type_='foreignkey')
-    op.drop_column('staff', 'kitchen_station_id')
-    op.drop_column('staff', 'kitchen_station')
+
     op.add_column('staff_activity_logs', sa.Column('shift_type_actual', postgresql.ENUM('morning', 'afternoon', 'evening', 'night', 'full', name='shift_type_enum'), nullable=True))
     op.add_column('table_transfer_logs', sa.Column('session_id', sa.UUID(), nullable=True))
-    op.add_column('table_transfer_logs', sa.Column('transferred_by_staff_id', sa.UUID(), nullable=False))
+    # 1. Add transferred_by_staff_id as nullable first
+    op.add_column('table_transfer_logs', sa.Column('transferred_by_staff_id', sa.UUID(), nullable=True))
+    # 2. Copy data from transferred_by to transferred_by_staff_id
+    op.execute("UPDATE table_transfer_logs SET transferred_by_staff_id = transferred_by")
+    # 3. Clean up any orphan rows where transferred_by_staff_id is still null (if any exist)
+    op.execute("DELETE FROM table_transfer_logs WHERE transferred_by_staff_id IS NULL")
+    # 4. Alter column to nullable=False
+    op.alter_column('table_transfer_logs', 'transferred_by_staff_id', nullable=False)
+
     op.alter_column('table_transfer_logs', 'restaurant_id',
                existing_type=sa.UUID(),
                nullable=False)
@@ -200,14 +203,15 @@ def upgrade() -> None:
     op.drop_column('table_transfer_logs', 'order_id')
     op.add_column('tables', sa.Column('qr_code_printed_at', sa.DateTime(timezone=True), nullable=True))
     op.add_column('tables', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
-    op.add_column('waiter_calls', sa.Column('call_type', postgresql.ENUM('assistance', 'water', 'bill', 'other', name='call_type_enum'), nullable=False))
+    op.add_column('waiter_calls', sa.Column('call_type', postgresql.ENUM('assistance', 'water', 'bill', 'other', name='call_type_enum'), server_default='assistance', nullable=False))
     op.add_column('waiter_calls', sa.Column('acknowledged_at', sa.DateTime(timezone=True), nullable=True))
     op.add_column('waiter_calls', sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True))
     op.add_column('waiter_calls', sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
     op.alter_column('waiter_calls', 'status',
                existing_type=sa.TEXT(),
                type_=postgresql.ENUM('pending', 'acknowledged', 'completed', name='call_status_enum'),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using="status::call_status_enum")
     # ### end Alembic commands ###
 
 
