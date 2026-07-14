@@ -25,8 +25,13 @@ class Order(Base):
     payment_status: Mapped[PaymentStatus] = mapped_column(PG_ENUM(PaymentStatus, name="payment_status_enum"), default=PaymentStatus.pending)
     payment_method: Mapped[Optional[PaymentMethod]] = mapped_column(PG_ENUM(PaymentMethod, name="payment_method_enum"))
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    waiter_notes: Mapped[Optional[str]] = mapped_column(Text)
+    customer_phone: Mapped[Optional[str]] = mapped_column(Text)
+    notes: Mapped[Optional[str]] = mapped_column(Text)  # was 'waiter_notes' in old model
+    delivery_fee: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2))
+    customer_rating: Mapped[Optional[int]] = mapped_column(Integer)
+    branch_id: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     restaurant: Mapped["Restaurant"] = relationship(back_populates="orders")
     table: Mapped["Table"] = relationship(back_populates="orders")
@@ -67,6 +72,12 @@ class OrderItem(Base):
     hold_reason: Mapped[Optional[str]] = mapped_column(Text)
     hold_resume_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     hold_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    # Payment tracking
+    is_paid: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=False)
+    paid_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    served_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     order: Mapped["Order"] = relationship(back_populates="items")
     modifiers: Mapped[List["OrderItemModifier"]] = relationship(back_populates="order_item", cascade="all, delete-orphan", lazy="selectin")

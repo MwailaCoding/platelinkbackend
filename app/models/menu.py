@@ -15,6 +15,11 @@ class Category(Base):
     name: Mapped[str] = mapped_column(Text, nullable=False)
     display_order: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    image_url: Mapped[Optional[str]] = mapped_column(Text)
+    branch_id: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
     
     restaurant: Mapped["Restaurant"] = relationship(back_populates="categories")
     items: Mapped[List["MenuItem"]] = relationship(back_populates="category")
@@ -38,6 +43,11 @@ class MenuItem(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     display_order: Mapped[int] = mapped_column(Integer, default=0)
     station_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("kitchen_stations.id", ondelete="SET NULL"), nullable=True)
+    branch_id: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True)
+    is_vegetarian: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=False)
+    is_spicy: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=False)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
     
     restaurant: Mapped["Restaurant"] = relationship(back_populates="items")
     category: Mapped["Category"] = relationship(back_populates="items")
