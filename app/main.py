@@ -65,10 +65,14 @@ app = FastAPI(
 _raw_origins = settings.ALLOWED_ORIGINS.strip()
 _allowed_origins = ["*"] if _raw_origins == "*" else [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
+# NOTE: allow_credentials=True is incompatible with allow_origins=["*"] per the CORS spec.
+# When origins is "*", we must set allow_credentials=False. Use explicit origins for credentialed requests.
+_allow_credentials = _allowed_origins != ["*"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins,
-    allow_credentials=True,
+    allow_credentials=_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )

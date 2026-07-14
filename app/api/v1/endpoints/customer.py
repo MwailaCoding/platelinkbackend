@@ -58,12 +58,39 @@ async def get_full_menu(slug: str, db: AsyncSession = Depends(get_db)):
     
     return {
         "restaurant": {
+            "id": str(restaurant.id),
             "name": restaurant.name,
             "logo": restaurant.logo_url,
+            "slug": restaurant.slug,
             "payment_track": payment_track
         },
-        "categories": cats,
-        "items": items
+        "categories": [
+            {
+                "id": str(c.id),
+                "name": c.name,
+                "description": getattr(c, "description", None),
+                "image_url": getattr(c, "image_url", None),
+                "display_order": c.display_order,
+                "is_active": c.is_active,
+            }
+            for c in cats
+        ],
+        "items": [
+            {
+                "id": str(i.id),
+                "name": i.name,
+                "description": i.description,
+                "price": float(i.price),
+                "category_id": str(i.category_id) if i.category_id else None,
+                "image_url": i.image_url,
+                "is_available": i.is_available,
+                "is_popular": getattr(i, "is_popular", False),
+                "is_vegetarian": getattr(i, "is_vegetarian", False),
+                "is_spicy": getattr(i, "is_spicy", False),
+                "preparation_time": i.preparation_time,
+            }
+            for i in items
+        ],
     }
 
 @router.post("/sessions/start")
