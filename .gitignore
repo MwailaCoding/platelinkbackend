@@ -39,3 +39,20 @@ pip-selfcheck.json
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# ─── Development / Scratch files (should not be committed) ────────────────────
+scratch/
+
+# Verification & migration scripts (one-off dev utilities)
+verify_migration*.py
+verification_report*
+check_db*.py
+init_db.py
+nuke_db.py
+migrate_db.py
+update_db*.py
+
+# Report output files
+*.html
+*.json
+

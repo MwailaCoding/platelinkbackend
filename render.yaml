@@ -1,0 +1,81 @@
+# render.yaml — Render Blueprint for PlateLink Africa Backend
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: platelink-backend
+    runtime: python
+    pythonVersion: "3.11.9"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn -c gunicorn_conf.py app.main:app"
+    healthCheckPath: /health
+    autoDeploy: true
+
+    envVars:
+      # --- Core ---
+      - key: SECRET_KEY
+        sync: false          # Set manually in Render dashboard (sensitive)
+
+      # --- Database ---
+      # Render injects DATABASE_URL automatically when you link a Render Postgres DB.
+      # If using an external DB, set RENDER_DATABASE_URL below instead.
+      - key: RENDER_DATABASE_URL
+        sync: false          # Set manually: postgres://user:pass@host/db
+
+      # --- Redis ---
+      - key: REDIS_URL
+        sync: false          # Set manually: redis://user:pass@host:port
+
+      # --- Auth ---
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+
+      # --- CORS ---
+      - key: ALLOWED_ORIGINS
+        value: "*"           # Change to your frontend domain in production
+
+      # --- Payments ---
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_SHORTCODE
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_CALLBACK_URL
+        sync: false
+      - key: PESAPAL_CONSUMER_KEY
+        sync: false
+      - key: PESAPAL_CONSUMER_SECRET
+        sync: false
+      - key: PESAPAL_ENVIRONMENT
+        value: sandbox
+      - key: PESAPAL_CALLBACK_URL
+        sync: false
+
+      # --- Email ---
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        value: no-reply@platelink.africa
+      - key: BREVO_SENDER_NAME
+        value: PlateLink Africa
+
+      # --- Storage ---
+      - key: CLOUDINARY_URL
+        sync: false
+
+      # --- AI ---
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+
+      # --- SMS ---
+      - key: SMS_API_KEY
+        sync: false
+      - key: SMS_SENDER_ID
+        value: PLATELINK

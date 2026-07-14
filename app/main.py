@@ -61,9 +61,13 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
+# Parse ALLOWED_ORIGINS: "*" stays as-is; comma-separated URLs become a list
+_raw_origins = settings.ALLOWED_ORIGINS.strip()
+_allowed_origins = ["*"] if _raw_origins == "*" else [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -76,6 +80,12 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 # Explicit payment and webhook routers for fallback integration
 app.include_router(payments_router, prefix="/api/v1", tags=["Payments"])
 app.include_router(webhooks_router, prefix="/api/v1", tags=["Webhooks"])
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    """Root health check — used by Render to verify the service is alive."""
+    return {"status": "healthy", "service": settings.PROJECT_NAME}
+
 
 @app.get("/health/payments", tags=["Health"])
 async def payments_health():

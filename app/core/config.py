@@ -1,6 +1,6 @@
 # app/core/config.py
 from typing import List, Optional, Union
-from pydantic import AnyHttpUrl, validator
+from pydantic import AnyHttpUrl, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -11,14 +11,33 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     
     # DATABASE
+    # On Render, the injected DATABASE_URL uses the legacy postgres:// prefix.
+    # RENDER_DATABASE_URL overrides DATABASE_URL and is auto-converted to postgresql+asyncpg://.
     DATABASE_URL: str = "postgresql+asyncpg://postgres:2030@localhost:5432/platelink"
+    RENDER_DATABASE_URL: Optional[str] = None
     POSTGRES_USER: Optional[str] = None
     POSTGRES_PASSWORD: Optional[str] = None
     POSTGRES_DB: Optional[str] = None
-    
+
+    @model_validator(mode="after")
+    def resolve_database_url(self) -> "Settings":
+        """If RENDER_DATABASE_URL is set, convert and use it as DATABASE_URL."""
+        if self.RENDER_DATABASE_URL:
+            url = self.RENDER_DATABASE_URL
+            # Render injects postgres:// — asyncpg requires postgresql+asyncpg://
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgresql://") and "+asyncpg" not in url:
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            self.DATABASE_URL = url
+        return self
+
     # REDIS
-    REDIS_URL: str
+    REDIS_URL: str = "redis://localhost:6379/0"
     
+    # CORS — comma-separated list of allowed origins, or "*" for all
+    ALLOWED_ORIGINS: str = "*"
+
     # MPESA
     MPESA_CONSUMER_KEY: Optional[str] = None
     MPESA_CONSUMER_SECRET: Optional[str] = None
