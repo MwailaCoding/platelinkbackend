@@ -1,0 +1,1524 @@
+{
+  "verification_timestamp": "2026-07-14T01:16:44.780092",
+  "summary": {
+    "total_tables": 27,
+    "tables_ok": 24,
+    "tables_warning": 1,
+    "tables_error": 2,
+    "total_rows_source": 540,
+    "total_rows_target": 537,
+    "size_source_mb": 9.629683494567871,
+    "size_target_mb": 9.263365745544434,
+    "sequence_mismatches": 0,
+    "fk_mismatches": 0,
+    "index_mismatches": 0,
+    "orphaned_records_errors": 0
+  },
+  "table_results": [
+    {
+      "table_name": "activity_logs",
+      "status": "ERROR",
+      "messages": [
+        "Row count mismatch: source=78, target=75",
+        "Data checksum mismatch - data contents differ or may be corrupted",
+        "Size difference of 50.00% detected (source=64.0 KB, target=32.0 KB)"
+      ],
+      "source_rows": 78,
+      "target_rows": 75,
+      "row_mismatch": true,
+      "schema_issues": [],
+      "data_mismatch": true,
+      "size_source_bytes": 65536,
+      "size_target_bytes": 32768,
+      "checksum_source": "938eb1c067bff82ea4eb0c94dd86339d",
+      "checksum_target": "4bad77a190dc2dc9b54ca299f8e360d4"
+    },
+    {
+      "table_name": "alembic_version",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 1 rows"
+      ],
+      "source_rows": 1,
+      "target_rows": 1,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 24576,
+      "size_target_bytes": 24576,
+      "checksum_source": "2557d8febcc43820bc195db4b7888c9c",
+      "checksum_target": "2557d8febcc43820bc195db4b7888c9c"
+    },
+    {
+      "table_name": "branches",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 24576,
+      "size_target_bytes": 24576,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "categories",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 24 rows"
+      ],
+      "source_rows": 24,
+      "target_rows": 24,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 32768,
+      "size_target_bytes": 32768,
+      "checksum_source": "a3029afd464d587ddeae607f534233e7",
+      "checksum_target": "a3029afd464d587ddeae607f534233e7"
+    },
+    {
+      "table_name": "customer_sessions",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 19 rows"
+      ],
+      "source_rows": 19,
+      "target_rows": 19,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 49152,
+      "size_target_bytes": 49152,
+      "checksum_source": "a2dc7120d28925dd109c55daed2c74e0",
+      "checksum_target": "a2dc7120d28925dd109c55daed2c74e0"
+    },
+    {
+      "table_name": "floor_elements",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 16384,
+      "size_target_bytes": 16384,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "floors",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 16384,
+      "size_target_bytes": 16384,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "item_transfers",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 8192,
+      "size_target_bytes": 8192,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "kitchen_display_settings",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 7 rows"
+      ],
+      "source_rows": 7,
+      "target_rows": 7,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 24576,
+      "size_target_bytes": 24576,
+      "checksum_source": "ab2e54f10b1b4aafffbb2243f894d839",
+      "checksum_target": "ab2e54f10b1b4aafffbb2243f894d839"
+    },
+    {
+      "table_name": "kitchen_routing_rules",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 8192,
+      "size_target_bytes": 8192,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "kitchen_stations",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 7 rows"
+      ],
+      "source_rows": 7,
+      "target_rows": 7,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 24576,
+      "size_target_bytes": 24576,
+      "checksum_source": "b5e29eb6a434d76cdd3e848f43e16bae",
+      "checksum_target": "b5e29eb6a434d76cdd3e848f43e16bae"
+    },
+    {
+      "table_name": "menu_item_modifiers",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 16384,
+      "size_target_bytes": 16384,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "menu_items",
+      "status": "ERROR",
+      "messages": [
+        "Data checksum mismatch - data contents differ or may be corrupted"
+      ],
+      "source_rows": 28,
+      "target_rows": 28,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": true,
+      "size_source_bytes": 32768,
+      "size_target_bytes": 32768,
+      "checksum_source": "978ccbbbdd649f240907a9b6cfb0453c",
+      "checksum_target": "e38cfc31d28a9786f5b51fbc6bc88771"
+    },
+    {
+      "table_name": "mpesa_transactions",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 2 rows"
+      ],
+      "source_rows": 2,
+      "target_rows": 2,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 49152,
+      "size_target_bytes": 49152,
+      "checksum_source": "3c6f370659d5255dea127ab2800ddba8",
+      "checksum_target": "3c6f370659d5255dea127ab2800ddba8"
+    },
+    {
+      "table_name": "order_item_modifiers",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 8192,
+      "size_target_bytes": 8192,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "order_items",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 43 rows"
+      ],
+      "source_rows": 43,
+      "target_rows": 43,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 32768,
+      "size_target_bytes": 32768,
+      "checksum_source": "f002df20b9972ec1e3273fc212283889",
+      "checksum_target": "f002df20b9972ec1e3273fc212283889"
+    },
+    {
+      "table_name": "orders",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 23 rows"
+      ],
+      "source_rows": 23,
+      "target_rows": 23,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 65536,
+      "size_target_bytes": 65536,
+      "checksum_source": "b28d1c6f42371eef04407d239804563c",
+      "checksum_target": "b28d1c6f42371eef04407d239804563c"
+    },
+    {
+      "table_name": "payments",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 12 rows"
+      ],
+      "source_rows": 12,
+      "target_rows": 12,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 32768,
+      "size_target_bytes": 32768,
+      "checksum_source": "324316f4a8fb39f3f9ebe0e0db4ee775",
+      "checksum_target": "324316f4a8fb39f3f9ebe0e0db4ee775"
+    },
+    {
+      "table_name": "restaurant_settings",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 75 rows"
+      ],
+      "source_rows": 75,
+      "target_rows": 75,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 65536,
+      "size_target_bytes": 65536,
+      "checksum_source": "f32320a0babeae3f7e63591e2813f2fe",
+      "checksum_target": "f32320a0babeae3f7e63591e2813f2fe"
+    },
+    {
+      "table_name": "restaurants",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 23 rows"
+      ],
+      "source_rows": 23,
+      "target_rows": 23,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 81920,
+      "size_target_bytes": 81920,
+      "checksum_source": "c14b63eddc9425e11b745f2795c0cd1e",
+      "checksum_target": "c14b63eddc9425e11b745f2795c0cd1e"
+    },
+    {
+      "table_name": "staff",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 60 rows"
+      ],
+      "source_rows": 60,
+      "target_rows": 60,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 81920,
+      "size_target_bytes": 81920,
+      "checksum_source": "a7a03466c1126cff8c426f325b875796",
+      "checksum_target": "a7a03466c1126cff8c426f325b875796"
+    },
+    {
+      "table_name": "staff_activity_logs",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 8192,
+      "size_target_bytes": 8192,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "station_prep_times",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 24 rows"
+      ],
+      "source_rows": 24,
+      "target_rows": 24,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 24576,
+      "size_target_bytes": 24576,
+      "checksum_source": "ea4b769492b3b0cd8e4d13711ee9cd4d",
+      "checksum_target": "ea4b769492b3b0cd8e4d13711ee9cd4d"
+    },
+    {
+      "table_name": "table_transfer_logs",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 2 rows"
+      ],
+      "source_rows": 2,
+      "target_rows": 2,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 24576,
+      "size_target_bytes": 24576,
+      "checksum_source": "3a8e5266abf99603e739845e233a5eb7",
+      "checksum_target": "3a8e5266abf99603e739845e233a5eb7"
+    },
+    {
+      "table_name": "table_transfers",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 8192,
+      "size_target_bytes": 8192,
+      "checksum_source": null,
+      "checksum_target": null
+    },
+    {
+      "table_name": "tables",
+      "status": "WARNING",
+      "messages": [
+        "Size difference of 22.73% detected (source=176.0 KB, target=136.0 KB)"
+      ],
+      "source_rows": 112,
+      "target_rows": 112,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 180224,
+      "size_target_bytes": 139264,
+      "checksum_source": "d9ee812c6faaf84960edbcc51c85db91",
+      "checksum_target": "d9ee812c6faaf84960edbcc51c85db91"
+    },
+    {
+      "table_name": "waiter_calls",
+      "status": "OK",
+      "messages": [
+        "Table verified successfully: 0 rows"
+      ],
+      "source_rows": 0,
+      "target_rows": 0,
+      "row_mismatch": false,
+      "schema_issues": [],
+      "data_mismatch": false,
+      "size_source_bytes": 16384,
+      "size_target_bytes": 16384,
+      "checksum_source": null,
+      "checksum_target": null
+    }
+  ],
+  "sequence_results": [],
+  "fk_results": [
+    {
+      "constraint_name": "activity_logs_staff_id_fkey",
+      "table": "activity_logs",
+      "status": "OK",
+      "message": "FK links 'staff_id' to 'staff(id)'"
+    },
+    {
+      "constraint_name": "activity_logs_restaurant_id_fkey",
+      "table": "activity_logs",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "branches_restaurant_id_fkey",
+      "table": "branches",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "categories_branch_id_fkey",
+      "table": "categories",
+      "status": "OK",
+      "message": "FK links 'branch_id' to 'branches(id)'"
+    },
+    {
+      "constraint_name": "categories_restaurant_id_fkey",
+      "table": "categories",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "customer_sessions_table_id_fkey",
+      "table": "customer_sessions",
+      "status": "OK",
+      "message": "FK links 'table_id' to 'tables(id)'"
+    },
+    {
+      "constraint_name": "customer_sessions_branch_id_fkey",
+      "table": "customer_sessions",
+      "status": "OK",
+      "message": "FK links 'branch_id' to 'branches(id)'"
+    },
+    {
+      "constraint_name": "customer_sessions_restaurant_id_fkey",
+      "table": "customer_sessions",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "floor_elements_floor_id_fkey",
+      "table": "floor_elements",
+      "status": "OK",
+      "message": "FK links 'floor_id' to 'floors(id)'"
+    },
+    {
+      "constraint_name": "floors_restaurant_id_fkey",
+      "table": "floors",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "item_transfers_from_session_id_fkey",
+      "table": "item_transfers",
+      "status": "OK",
+      "message": "FK links 'from_session_id' to 'customer_sessions(id)'"
+    },
+    {
+      "constraint_name": "item_transfers_restaurant_id_fkey",
+      "table": "item_transfers",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "item_transfers_transferred_by_fkey",
+      "table": "item_transfers",
+      "status": "OK",
+      "message": "FK links 'transferred_by' to 'staff(id)'"
+    },
+    {
+      "constraint_name": "item_transfers_to_session_id_fkey",
+      "table": "item_transfers",
+      "status": "OK",
+      "message": "FK links 'to_session_id' to 'customer_sessions(id)'"
+    },
+    {
+      "constraint_name": "item_transfers_order_item_id_fkey",
+      "table": "item_transfers",
+      "status": "OK",
+      "message": "FK links 'order_item_id' to 'order_items(id)'"
+    },
+    {
+      "constraint_name": "kitchen_display_settings_restaurant_id_fkey",
+      "table": "kitchen_display_settings",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "kitchen_display_settings_station_id_fkey",
+      "table": "kitchen_display_settings",
+      "status": "OK",
+      "message": "FK links 'station_id' to 'kitchen_stations(id)'"
+    },
+    {
+      "constraint_name": "kitchen_routing_rules_source_station_id_fkey",
+      "table": "kitchen_routing_rules",
+      "status": "OK",
+      "message": "FK links 'source_station_id' to 'kitchen_stations(id)'"
+    },
+    {
+      "constraint_name": "kitchen_routing_rules_restaurant_id_fkey",
+      "table": "kitchen_routing_rules",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "kitchen_routing_rules_target_station_id_fkey",
+      "table": "kitchen_routing_rules",
+      "status": "OK",
+      "message": "FK links 'target_station_id' to 'kitchen_stations(id)'"
+    },
+    {
+      "constraint_name": "kitchen_stations_restaurant_id_fkey",
+      "table": "kitchen_stations",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "menu_item_modifiers_menu_item_id_fkey",
+      "table": "menu_item_modifiers",
+      "status": "OK",
+      "message": "FK links 'menu_item_id' to 'menu_items(id)'"
+    },
+    {
+      "constraint_name": "menu_item_modifiers_restaurant_id_fkey",
+      "table": "menu_item_modifiers",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "menu_items_restaurant_id_fkey",
+      "table": "menu_items",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "menu_items_branch_id_fkey",
+      "table": "menu_items",
+      "status": "OK",
+      "message": "FK links 'branch_id' to 'branches(id)'"
+    },
+    {
+      "constraint_name": "fk_menu_items_station_id",
+      "table": "menu_items",
+      "status": "OK",
+      "message": "FK links 'station_id' to 'kitchen_stations(id)'"
+    },
+    {
+      "constraint_name": "menu_items_category_id_fkey",
+      "table": "menu_items",
+      "status": "OK",
+      "message": "FK links 'category_id' to 'categories(id)'"
+    },
+    {
+      "constraint_name": "mpesa_transactions_restaurant_id_fkey",
+      "table": "mpesa_transactions",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "order_item_modifiers_restaurant_id_fkey",
+      "table": "order_item_modifiers",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "order_item_modifiers_order_item_id_fkey",
+      "table": "order_item_modifiers",
+      "status": "OK",
+      "message": "FK links 'order_item_id' to 'order_items(id)'"
+    },
+    {
+      "constraint_name": "order_item_modifiers_modifier_id_fkey",
+      "table": "order_item_modifiers",
+      "status": "OK",
+      "message": "FK links 'modifier_id' to 'menu_item_modifiers(id)'"
+    },
+    {
+      "constraint_name": "order_items_menu_item_id_fkey",
+      "table": "order_items",
+      "status": "OK",
+      "message": "FK links 'menu_item_id' to 'menu_items(id)'"
+    },
+    {
+      "constraint_name": "order_items_order_id_fkey",
+      "table": "order_items",
+      "status": "OK",
+      "message": "FK links 'order_id' to 'orders(id)'"
+    },
+    {
+      "constraint_name": "orders_restaurant_id_fkey",
+      "table": "orders",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "orders_branch_id_fkey",
+      "table": "orders",
+      "status": "OK",
+      "message": "FK links 'branch_id' to 'branches(id)'"
+    },
+    {
+      "constraint_name": "orders_table_id_fkey",
+      "table": "orders",
+      "status": "OK",
+      "message": "FK links 'table_id' to 'tables(id)'"
+    },
+    {
+      "constraint_name": "orders_session_id_fkey",
+      "table": "orders",
+      "status": "OK",
+      "message": "FK links 'session_id' to 'customer_sessions(id)'"
+    },
+    {
+      "constraint_name": "orders_staff_id_fkey",
+      "table": "orders",
+      "status": "OK",
+      "message": "FK links 'staff_id' to 'staff(id)'"
+    },
+    {
+      "constraint_name": "payments_restaurant_id_fkey",
+      "table": "payments",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "payments_order_id_fkey",
+      "table": "payments",
+      "status": "OK",
+      "message": "FK links 'order_id' to 'orders(id)'"
+    },
+    {
+      "constraint_name": "payments_cashier_id_fkey",
+      "table": "payments",
+      "status": "OK",
+      "message": "FK links 'cashier_id' to 'staff(id)'"
+    },
+    {
+      "constraint_name": "restaurant_settings_restaurant_id_fkey",
+      "table": "restaurant_settings",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "restaurants_parent_restaurant_id_fkey",
+      "table": "restaurants",
+      "status": "OK",
+      "message": "FK links 'parent_restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "staff_branch_id_fkey",
+      "table": "staff",
+      "status": "OK",
+      "message": "FK links 'branch_id' to 'branches(id)'"
+    },
+    {
+      "constraint_name": "staff_restaurant_id_fkey",
+      "table": "staff",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "fk_staff_kitchen_station_id",
+      "table": "staff",
+      "status": "OK",
+      "message": "FK links 'kitchen_station_id' to 'kitchen_stations(id)'"
+    },
+    {
+      "constraint_name": "staff_activity_logs_staff_id_fkey",
+      "table": "staff_activity_logs",
+      "status": "OK",
+      "message": "FK links 'staff_id' to 'staff(id)'"
+    },
+    {
+      "constraint_name": "staff_activity_logs_restaurant_id_fkey",
+      "table": "staff_activity_logs",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "station_prep_times_restaurant_id_fkey",
+      "table": "station_prep_times",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "station_prep_times_station_id_fkey",
+      "table": "station_prep_times",
+      "status": "OK",
+      "message": "FK links 'station_id' to 'kitchen_stations(id)'"
+    },
+    {
+      "constraint_name": "table_transfer_logs_order_id_fkey",
+      "table": "table_transfer_logs",
+      "status": "OK",
+      "message": "FK links 'order_id' to 'orders(id)'"
+    },
+    {
+      "constraint_name": "table_transfer_logs_transferred_by_fkey",
+      "table": "table_transfer_logs",
+      "status": "OK",
+      "message": "FK links 'transferred_by' to 'staff(id)'"
+    },
+    {
+      "constraint_name": "table_transfer_logs_new_table_id_fkey",
+      "table": "table_transfer_logs",
+      "status": "OK",
+      "message": "FK links 'new_table_id' to 'tables(id)'"
+    },
+    {
+      "constraint_name": "table_transfer_logs_original_table_id_fkey",
+      "table": "table_transfer_logs",
+      "status": "OK",
+      "message": "FK links 'original_table_id' to 'tables(id)'"
+    },
+    {
+      "constraint_name": "table_transfer_logs_restaurant_id_fkey",
+      "table": "table_transfer_logs",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "table_transfers_new_table_id_fkey",
+      "table": "table_transfers",
+      "status": "OK",
+      "message": "FK links 'new_table_id' to 'tables(id)'"
+    },
+    {
+      "constraint_name": "table_transfers_transferred_by_fkey",
+      "table": "table_transfers",
+      "status": "OK",
+      "message": "FK links 'transferred_by' to 'staff(id)'"
+    },
+    {
+      "constraint_name": "table_transfers_restaurant_id_fkey",
+      "table": "table_transfers",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "table_transfers_original_table_id_fkey",
+      "table": "table_transfers",
+      "status": "OK",
+      "message": "FK links 'original_table_id' to 'tables(id)'"
+    },
+    {
+      "constraint_name": "table_transfers_order_id_fkey",
+      "table": "table_transfers",
+      "status": "OK",
+      "message": "FK links 'order_id' to 'orders(id)'"
+    },
+    {
+      "constraint_name": "tables_restaurant_id_fkey",
+      "table": "tables",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "tables_branch_id_fkey",
+      "table": "tables",
+      "status": "OK",
+      "message": "FK links 'branch_id' to 'branches(id)'"
+    },
+    {
+      "constraint_name": "tables_floor_id_fkey",
+      "table": "tables",
+      "status": "OK",
+      "message": "FK links 'floor_id' to 'floors(id)'"
+    },
+    {
+      "constraint_name": "waiter_calls_table_id_fkey",
+      "table": "waiter_calls",
+      "status": "OK",
+      "message": "FK links 'table_id' to 'tables(id)'"
+    },
+    {
+      "constraint_name": "waiter_calls_restaurant_id_fkey",
+      "table": "waiter_calls",
+      "status": "OK",
+      "message": "FK links 'restaurant_id' to 'restaurants(id)'"
+    },
+    {
+      "constraint_name": "waiter_calls_acknowledged_by_fkey",
+      "table": "waiter_calls",
+      "status": "OK",
+      "message": "FK links 'acknowledged_by' to 'staff(id)'"
+    }
+  ],
+  "index_results": [
+    {
+      "index_name": "alembic_version_pkc",
+      "table": "alembic_version",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "idx_branches_restaurant_id",
+      "table": "branches",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "customer_sessions_session_token_key",
+      "table": "customer_sessions",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "mpesa_transactions_checkout_request_id_key",
+      "table": "mpesa_transactions",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "idx_orders_branch_id",
+      "table": "orders",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "orders_order_number_key",
+      "table": "orders",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "restaurants_prefix_key",
+      "table": "restaurants",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "restaurants_subdomain_key",
+      "table": "restaurants",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "restaurants_slug_key",
+      "table": "restaurants",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "idx_staff_branch_id",
+      "table": "staff",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "tables_restaurant_id_table_number_key",
+      "table": "tables",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    },
+    {
+      "index_name": "idx_tables_branch_id",
+      "table": "tables",
+      "status": "OK",
+      "message": "Index exists and matches definition"
+    }
+  ],
+  "orphaned_results": [
+    {
+      "child_table": "activity_logs",
+      "child_column": "staff_id",
+      "parent_table": "staff",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "activity_logs",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "branches",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "categories",
+      "child_column": "branch_id",
+      "parent_table": "branches",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "categories",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "customer_sessions",
+      "child_column": "table_id",
+      "parent_table": "tables",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "customer_sessions",
+      "child_column": "branch_id",
+      "parent_table": "branches",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "customer_sessions",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "floor_elements",
+      "child_column": "floor_id",
+      "parent_table": "floors",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "floors",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "item_transfers",
+      "child_column": "from_session_id",
+      "parent_table": "customer_sessions",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "item_transfers",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "item_transfers",
+      "child_column": "transferred_by",
+      "parent_table": "staff",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "item_transfers",
+      "child_column": "to_session_id",
+      "parent_table": "customer_sessions",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "item_transfers",
+      "child_column": "order_item_id",
+      "parent_table": "order_items",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "kitchen_display_settings",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "kitchen_display_settings",
+      "child_column": "station_id",
+      "parent_table": "kitchen_stations",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "kitchen_routing_rules",
+      "child_column": "source_station_id",
+      "parent_table": "kitchen_stations",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "kitchen_routing_rules",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "kitchen_routing_rules",
+      "child_column": "target_station_id",
+      "parent_table": "kitchen_stations",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "kitchen_stations",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "menu_item_modifiers",
+      "child_column": "menu_item_id",
+      "parent_table": "menu_items",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "menu_item_modifiers",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "menu_items",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "menu_items",
+      "child_column": "branch_id",
+      "parent_table": "branches",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "menu_items",
+      "child_column": "station_id",
+      "parent_table": "kitchen_stations",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "menu_items",
+      "child_column": "category_id",
+      "parent_table": "categories",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "mpesa_transactions",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "order_item_modifiers",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "order_item_modifiers",
+      "child_column": "order_item_id",
+      "parent_table": "order_items",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "order_item_modifiers",
+      "child_column": "modifier_id",
+      "parent_table": "menu_item_modifiers",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "order_items",
+      "child_column": "menu_item_id",
+      "parent_table": "menu_items",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "order_items",
+      "child_column": "order_id",
+      "parent_table": "orders",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "orders",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "orders",
+      "child_column": "branch_id",
+      "parent_table": "branches",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "orders",
+      "child_column": "table_id",
+      "parent_table": "tables",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "orders",
+      "child_column": "session_id",
+      "parent_table": "customer_sessions",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "orders",
+      "child_column": "staff_id",
+      "parent_table": "staff",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "payments",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "payments",
+      "child_column": "order_id",
+      "parent_table": "orders",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "payments",
+      "child_column": "cashier_id",
+      "parent_table": "staff",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "restaurant_settings",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "restaurants",
+      "child_column": "parent_restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "staff",
+      "child_column": "branch_id",
+      "parent_table": "branches",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "staff",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "staff",
+      "child_column": "kitchen_station_id",
+      "parent_table": "kitchen_stations",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "staff_activity_logs",
+      "child_column": "staff_id",
+      "parent_table": "staff",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "staff_activity_logs",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "station_prep_times",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "station_prep_times",
+      "child_column": "station_id",
+      "parent_table": "kitchen_stations",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfer_logs",
+      "child_column": "order_id",
+      "parent_table": "orders",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfer_logs",
+      "child_column": "transferred_by",
+      "parent_table": "staff",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfer_logs",
+      "child_column": "new_table_id",
+      "parent_table": "tables",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfer_logs",
+      "child_column": "original_table_id",
+      "parent_table": "tables",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfer_logs",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfers",
+      "child_column": "new_table_id",
+      "parent_table": "tables",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfers",
+      "child_column": "transferred_by",
+      "parent_table": "staff",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfers",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfers",
+      "child_column": "original_table_id",
+      "parent_table": "tables",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "table_transfers",
+      "child_column": "order_id",
+      "parent_table": "orders",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "tables",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "tables",
+      "child_column": "branch_id",
+      "parent_table": "branches",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "tables",
+      "child_column": "floor_id",
+      "parent_table": "floors",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "waiter_calls",
+      "child_column": "table_id",
+      "parent_table": "tables",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "waiter_calls",
+      "child_column": "restaurant_id",
+      "parent_table": "restaurants",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    },
+    {
+      "child_table": "waiter_calls",
+      "child_column": "acknowledged_by",
+      "parent_table": "staff",
+      "parent_column": "id",
+      "orphaned_count": 0,
+      "status": "OK",
+      "message": "No orphaned records found"
+    }
+  ],
+  "errors": [],
+  "overall_status": "FAILED"
+}

@@ -6,7 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
-from app.core.deps import get_db, get_current_user, check_role
+from app.core.deps import get_db, get_current_user, check_role, reusable_oauth2
+from app.core.config import settings
+from jose import jwt
 from app.models import Order, OrderItem, Staff, OrderStatus, ActivityLog, TableStatus
 from app.schemas import schemas
 from app.websockets.manager import manager
@@ -41,16 +43,24 @@ async def list_orders(
 @router.get("/{order_id}", response_model=schemas.OrderRead)
 async def get_order(
     order_id: str,
-    current_user: Staff = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    token: str = Depends(reusable_oauth2)
 ):
     """
-    Get order details.
+    Get order details. Supports both staff users and customer table sessions.
     """
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        restaurant_id = payload.get("restaurant_id")
+        if not restaurant_id:
+            raise Exception()
+    except Exception:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+
     stmt = select(Order).options(selectinload(Order.table)).where(Order.id == order_id)
     res = await db.execute(stmt)
     order = res.scalar_one_or_none()
-    if not order or order.restaurant_id != current_user.restaurant_id:
+    if not order or str(order.restaurant_id) != str(restaurant_id):
         raise HTTPException(status_code=404, detail="Order not found")
         
     stmt = select(OrderItem).where(OrderItem.order_id == order_id)

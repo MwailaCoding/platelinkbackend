@@ -1,9 +1,17 @@
 # app/services/cloudinary.py
+import re
 import cloudinary
 import cloudinary.uploader
 from app.core.config import settings
 
-cloudinary.config(cloudinary_url=settings.CLOUDINARY_URL)
+if settings.CLOUDINARY_URL and "key" not in settings.CLOUDINARY_URL:
+    match = re.match(r"cloudinary://([^:]+):([^@]+)@(.+)", settings.CLOUDINARY_URL)
+    if match:
+        cloudinary.config(
+            api_key=match.group(1),
+            api_secret=match.group(2),
+            cloud_name=match.group(3)
+        )
 
 class CloudinaryService:
     @staticmethod

@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Body, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, update
+from sqlalchemy.orm import selectinload
 from app.core.deps import get_db
 from app.models import (
     Order, OrderItem, OrderStatus, MenuItem, KitchenDisplaySetting,
@@ -234,7 +235,10 @@ async def ready_item(
     item.ready_at = datetime.utcnow()
     
     # Check if all items in order are ready
-    order = await db.get(Order, order_id)
+    order_res = await db.execute(
+        select(Order).options(selectinload(Order.table)).where(Order.id == order_id)
+    )
+    order = order_res.scalar_one_or_none()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
         

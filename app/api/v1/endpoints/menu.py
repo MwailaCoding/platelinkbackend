@@ -10,6 +10,7 @@ from app.core.deps import get_db, get_current_user, check_role
 from app.models import Category, MenuItem, MenuItemModifier, Staff, ActivityLog
 from app.schemas import schemas
 from app.websockets.manager import manager
+from app.services.cloudinary import CloudinaryService
 
 router = APIRouter()
 
@@ -206,6 +207,25 @@ async def delete_item(
     item.is_available = False
     await db.commit()
     return {"msg": "Item marked as unavailable"}
+
+@router.post("/items/upload-image")
+async def upload_menu_item_image(
+    file: UploadFile = File(...),
+    current_user: Staff = Depends(check_role(["owner", "manager"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Upload menu item image to Cloudinary.
+    """
+    if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
+        raise HTTPException(status_code=400, detail="Invalid file type")
+    
+    content = await file.read()
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
+        
+    url = await CloudinaryService.upload_image(content)
+    return {"url": url}
 
 @router.post("/items/bulk-import")
 async def bulk_import_items(

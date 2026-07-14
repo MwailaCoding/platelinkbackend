@@ -113,7 +113,7 @@ async def get_pending_calls(
     """
     stmt = select(WaiterCall).options(selectinload(WaiterCall.table)).where(
         WaiterCall.restaurant_id == current_user.restaurant_id,
-        WaiterCall.status == CallStatus.pending,
+        WaiterCall.status == CallStatus.pending.value,
         WaiterCall.message != "Bill Requested"
     ).order_by(WaiterCall.created_at.desc())
     
@@ -136,7 +136,7 @@ async def get_waiter_bills(
     """
     stmt = select(WaiterCall).options(selectinload(WaiterCall.table)).where(
         WaiterCall.restaurant_id == current_user.restaurant_id,
-        WaiterCall.status == CallStatus.pending,
+        WaiterCall.status == CallStatus.pending.value,
         WaiterCall.message == "Bill Requested"
     ).order_by(WaiterCall.created_at.desc())
     

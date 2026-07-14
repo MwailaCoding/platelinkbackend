@@ -14,7 +14,7 @@ from app.core.deps import get_db, get_current_user
 from app.models import (
     Order, Payment, Staff, MpesaTransaction,
     OrderStatus, PaymentStatus, PaymentMethod, ActivityLog,
-    OrderItem, MenuItem, Restaurant
+    OrderItem, MenuItem, Restaurant, CustomerSession
 )
 from app.services.pesapal_service import PesapalService
 from app.services.daraja_service import DarajaService
@@ -736,8 +736,7 @@ async def get_unpaid_items(
         )
     
     stmt = select(OrderItem).where(
-        OrderItem.order_id == order_uuid,
-        OrderItem.is_paid == False
+        OrderItem.order_id == order_uuid
     )
     result = await db.execute(stmt)
     unpaid_items = result.scalars().all()
@@ -757,11 +756,18 @@ async def get_unpaid_items(
         })
         total_due += item.subtotal
     
+    # Fetch customer_phone from the session if available
+    customer_phone = None
+    if order.session_id:
+        session = await db.get(CustomerSession, order.session_id)
+        if session:
+            customer_phone = session.customer_phone
+
     return {
         "order_id": str(order.id),
         "order_number": order.order_number,
-        "table_number": getattr(order, 'table_number', None) or order.table_id,
-        "customer_phone": order.customer_phone,
+        "table_number": getattr(order, 'table_number', None) or str(order.table_id) if order.table_id else None,
+        "customer_phone": customer_phone,
         "total_due": float(total_due),
         "items": items_data
     }

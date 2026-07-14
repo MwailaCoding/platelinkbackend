@@ -23,7 +23,17 @@ async def get_full_menu(slug: str, db: AsyncSession = Depends(get_db)):
     """
     Public menu for a restaurant.
     """
-    stmt = select(Restaurant).where(Restaurant.slug == slug, Restaurant.is_active == True, Restaurant.deleted_at == None)
+    import uuid
+    try:
+        uuid_obj = uuid.UUID(slug, version=4)
+        is_uuid = True
+    except ValueError:
+        is_uuid = False
+
+    if is_uuid:
+        stmt = select(Restaurant).where(Restaurant.id == slug, Restaurant.is_active == True, Restaurant.deleted_at == None)
+    else:
+        stmt = select(Restaurant).where(Restaurant.slug == slug, Restaurant.is_active == True, Restaurant.deleted_at == None)
     res = await db.execute(stmt)
     restaurant = res.scalar_one_or_none()
     if not restaurant:
@@ -63,6 +73,8 @@ async def start_session(data: schemas.SessionStart, db: AsyncSession = Depends(g
     """
     try:
         payload = jwt.decode(data.qr_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "table":
+            raise Exception("Token must be a table QR token")
         table_id = payload.get("sub")
         restaurant_id = payload.get("restaurant_id")
     except Exception:
@@ -81,22 +93,33 @@ async def start_session(data: schemas.SessionStart, db: AsyncSession = Depends(g
     existing_session = res.scalar_one_or_none()
 
     if existing_session:
-        # If the table status got out of sync, update it to occupied
-        if table.status != TableStatus.occupied:
-            table.status = TableStatus.occupied
-            table.occupied_since = datetime.utcnow()
-            table.current_session_id = existing_session.id
+        # Check if the existing session token is actually expired
+        try:
+            jwt.decode(existing_session.session_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            # Token is valid, return it
+            if table.status != TableStatus.occupied:
+                table.status = TableStatus.occupied
+                table.occupied_since = datetime.utcnow()
+                table.current_session_id = existing_session.id
+                await db.commit()
+            return {
+                "session_token": existing_session.session_token,
+                "table_number": table.table_number,
+                "session_id": str(existing_session.id)
+            }
+        except jwt.ExpiredSignatureError:
+            # Token expired, close this session and generate a new one
+            existing_session.status = SessionStatus.closed
             await db.commit()
-        return {
-            "session_token": existing_session.session_token,
-            "table_number": table.table_number,
-            "session_id": str(existing_session.id)
-        }
+        except Exception:
+            # Other errors, close it
+            existing_session.status = SessionStatus.closed
+            await db.commit()
         
     # Generate session token
     session_token = security.create_access_token(
         subject=str(table_id),
-        expires_delta=timedelta(hours=4), # Session lasts 4 hours
+        expires_delta=timedelta(hours=24), # Session lasts 24 hours
         extra_claims={"type": "session", "restaurant_id": str(restaurant_id)}
     )
     
@@ -317,7 +340,7 @@ async def call_waiter(token: str, data: schemas.WaiterCallCreate, db: AsyncSessi
         restaurant_id=session.restaurant_id,
         table_id=session.table_id,
         message=data.message or "Assistance Requested",
-        status=CallStatus.pending
+        status=CallStatus.pending.value
     )
     db.add(new_call)
     await db.commit()
@@ -341,7 +364,7 @@ async def request_bill(token: str, db: AsyncSession = Depends(get_db)):
         restaurant_id=session.restaurant_id,
         table_id=session.table_id,
         message="Bill Requested",
-        status=CallStatus.pending
+        status=CallStatus.pending.value
     )
     db.add(new_call)
     await db.commit()
@@ -394,3 +417,26 @@ async def get_session_details(token: str, db: AsyncSession = Depends(get_db)):
     }
 
 
+
+@router.get("/sessions/{token}/orders/{order_id}", response_model=schemas.OrderRead)
+async def get_session_order(token: str, order_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Get specific order details for a customer session.
+    """
+    session = await validate_session(token, db)
+    
+    stmt = select(Order).options(selectinload(Order.table)).where(
+        Order.id == order_id,
+        Order.session_id == session.id
+    )
+    res = await db.execute(stmt)
+    order = res.scalar_one_or_none()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+        
+    stmt = select(OrderItem).where(OrderItem.order_id == order_id)
+    res = await db.execute(stmt)
+    order.items = res.scalars().all()
+    
+    return order
