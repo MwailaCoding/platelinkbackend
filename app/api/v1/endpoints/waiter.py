@@ -85,14 +85,42 @@ async def mark_served(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Waiter marks order as served.
+    Waiter marks order as served. Closes the customer session and frees the table.
     """
-    order = await db.get(Order, order_id)
+    import uuid
+    try:
+        order_uuid = uuid.UUID(order_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid order_id format")
+
+    order = await db.get(Order, order_uuid)
     if not order or order.restaurant_id != current_user.restaurant_id:
         raise HTTPException(status_code=404, detail="Order not found")
         
     order.status = OrderStatus.served
     order.staff_id = current_user.id
+
+    # Find and expire the customer session
+    if order.session_id:
+        session = await db.get(CustomerSession, order.session_id)
+        if session:
+            session.status = SessionStatus.closed
+            db.add(session)
+            
+            # Reset table status
+            if session.table_id:
+                table = await db.get(Table, session.table_id)
+                if table:
+                    table.status = TableStatus.available
+                    table.current_session_id = None
+                    db.add(table)
+            
+            # Broadcast session closed to the customer app
+            await manager.broadcast(
+                {"type": "session_closed", "session_id": str(session.id)},
+                str(current_user.restaurant_id)
+            )
+
     await db.commit()
     
     # Broadcast to KDS to clear order
@@ -101,7 +129,7 @@ async def mark_served(
         str(current_user.restaurant_id)
     )
     
-    return {"msg": "Order served"}
+    return {"msg": "Order served and session closed"}
 
 @router.get("/calls", response_model=List[schemas.WaiterCallRead])
 async def get_pending_calls(
@@ -275,7 +303,7 @@ async def add_order_note(
     if not order or order.restaurant_id != current_user.restaurant_id:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    order.waiter_notes = payload.note
+    order.notes = payload.note
     await db.commit()
 
     # Broadcast order_note_added to KDS
