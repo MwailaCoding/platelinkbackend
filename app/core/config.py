@@ -21,15 +21,24 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def resolve_database_url(self) -> "Settings":
-        """If RENDER_DATABASE_URL is set, convert and use it as DATABASE_URL."""
-        if self.RENDER_DATABASE_URL:
-            url = self.RENDER_DATABASE_URL
-            # Render injects postgres:// — asyncpg requires postgresql+asyncpg://
-            if url.startswith("postgres://"):
-                url = url.replace("postgres://", "postgresql+asyncpg://", 1)
-            elif url.startswith("postgresql://") and "+asyncpg" not in url:
-                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-            self.DATABASE_URL = url
+        """
+        Normalize DATABASE_URL to always use the postgresql+asyncpg:// scheme.
+
+        Render can inject the DB URL in two ways:
+          1. As DATABASE_URL=postgres://...   (when you link a Render Postgres)
+          2. As RENDER_DATABASE_URL=postgres://... (our explicit env var)
+
+        Both cases are handled here so asyncpg always gets the right dialect.
+        """
+        # Prefer explicit RENDER_DATABASE_URL override if set
+        url = self.RENDER_DATABASE_URL or self.DATABASE_URL
+
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://") and "+asyncpg" not in url:
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+        self.DATABASE_URL = url
         return self
 
     # REDIS
