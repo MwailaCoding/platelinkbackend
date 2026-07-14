@@ -34,7 +34,7 @@ services:
 
       # --- CORS ---
       - key: ALLOWED_ORIGINS
-        value: "*"           # Change to your frontend domain in production
+        value: "https://platelink-admin.vercel.app,https://platelink-customer.vercel.app,https://platelink-kitchen.vercel.app,https://platelink-waiter.vercel.app"
 
       # --- Payments ---
       - key: MPESA_CONSUMER_KEY
