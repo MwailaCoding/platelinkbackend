@@ -23,14 +23,18 @@ logging.basicConfig(
 logger = logging.getLogger("platelink_api")
 
 async def apply_schema_migrations():
-    """Safely apply missing columns to existing PostgreSQL tables on Render."""
+    """Safely apply all missing columns to existing PostgreSQL tables on Render."""
     migration_sqls = [
         "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS size VARCHAR(50) NOT NULL DEFAULT 'medium';",
-        "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_multi_branch BOOLEAN NOT NULL DEFAULT FALSE;",
         "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS type VARCHAR(50) NOT NULL DEFAULT 'casual_dining';",
+        "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_multi_branch BOOLEAN NOT NULL DEFAULT FALSE;",
         "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS parent_restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL;",
+        "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS logo_url VARCHAR(255);",
+        "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS primary_color VARCHAR(7) NOT NULL DEFAULT '#F97316';",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS pin VARCHAR(4);",
+        "ALTER TABLE branches ADD COLUMN IF NOT EXISTS address VARCHAR(255);",
+        "ALTER TABLE branches ADD COLUMN IF NOT EXISTS phone VARCHAR(50);",
     ]
     for sql in migration_sqls:
         try:
