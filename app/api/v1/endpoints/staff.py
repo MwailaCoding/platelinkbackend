@@ -1,203 +1,155 @@
-# app/api/v1/endpoints/staff.py
-from typing import List, Union
-from fastapi import APIRouter, Depends, HTTPException, Body
+"""Staff management API endpoints."""
+import logging
+from uuid import UUID
+from datetime import date
+from typing import Optional, List, Dict, Any
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.core import security
-from app.core.deps import get_db, get_current_user, check_role
-from app.models import Staff, ActivityLog, StaffRole
-from app.schemas import schemas
 
-router = APIRouter()
+from apps.api.app.core.database import get_db
+from apps.api.app.core.permissions import require_permission
+from apps.api.app.models.user import User
+from apps.api.app.services.staff_service import StaffService
+from apps.api.app.schemas.staff import (
+    StaffCreate,
+    StaffUpdate,
+    StaffResponse,
+    StaffWithUserResponse,
+)
 
-@router.get("/", response_model=List[schemas.StaffRead])
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/staff", tags=["Staff"])
+
+@router.get("/", response_model=List[StaffWithUserResponse])
 async def list_staff(
-    current_user: Staff = Depends(check_role(["owner", "manager"])),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+    user_status: Optional[str] = Query(None, alias="status"),
+    role_id: Optional[UUID] = Query(None),
+    department: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    current_user: User = Depends(require_permission("view_staff")),
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    List all staff for the restaurant.
-    """
-    stmt = select(Staff).where(Staff.restaurant_id == current_user.restaurant_id)
-    result = await db.execute(stmt)
-    return result.scalars().all()
+    """List staff members with filters and pagination."""
+    service = StaffService(db)
+    staff_list, total = await service.list_staff(
+        current_user.restaurant_id,
+        skip, limit, user_status, role_id, department, search
+    )
+    return [StaffWithUserResponse(**item) for item in staff_list]
 
-@router.post("/", response_model=schemas.StaffRead)
+@router.get("/online", response_model=List[Dict[str, Any]])
+async def get_online_staff(
+    current_user: User = Depends(require_permission("view_staff")),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get currently online/checked-in staff members."""
+    service = StaffService(db)
+    return await service.get_online_staff(current_user.restaurant_id)
+
+@router.get("/{staff_id}", response_model=StaffWithUserResponse)
+async def get_staff(
+    staff_id: UUID,
+    current_user: User = Depends(require_permission("view_staff")),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get staff member by ID."""
+    service = StaffService(db)
+    staff = await service.get_staff(staff_id, current_user.restaurant_id)
+    if not staff:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Staff not found")
+
+    u = staff.user
+    item = {
+        "id": staff.id,
+        "user_id": staff.user_id,
+        "employee_id": staff.employee_id,
+        "department": staff.department,
+        "position": staff.position,
+        "hire_date": staff.hire_date,
+        "salary": staff.salary,
+        "shift_preferences": staff.shift_preferences or [],
+        "skills": staff.skills or [],
+        "certifications": staff.certifications or [],
+        "status": u.status if u else "active",
+        "created_at": staff.created_at,
+        "email": u.email if u else "",
+        "first_name": u.first_name if u else "",
+        "last_name": u.last_name if u else "",
+        "phone": u.phone if u else None,
+        "role": {"id": u.role.id, "name": u.role.name} if u and u.role else None,
+        "branch": None
+    }
+    return StaffWithUserResponse(**item)
+
+@router.post("/", response_model=StaffResponse, status_code=status.HTTP_201_CREATED)
 async def create_staff(
-    data: schemas.StaffCreate,
-    current_user: Staff = Depends(check_role(["owner", "manager", "branch_manager"])),
+    staff_data: StaffCreate,
+    current_user: User = Depends(require_permission("add_staff")),
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Create a new staff member.
-    """
-    if current_user.role.value == 'owner' or getattr(current_user, 'role_type', '') == 'owner':
-        branch_id = getattr(data, 'branch_id', None)
-    elif getattr(current_user, 'role_type', '') == 'branch_manager' or current_user.role.value == 'branch_manager':
-        req_branch_id = str(getattr(data, 'branch_id', ''))
-        if req_branch_id and req_branch_id != str(current_user.branch_id):
-            raise HTTPException(403, "Cannot assign staff to other branches")
-        branch_id = current_user.branch_id
-    else:
-        raise HTTPException(403, "Only owner or branch manager can add staff")
+    """Create new staff member and user profile."""
+    service = StaffService(db)
+    u_dict = staff_data.model_dump()
+    s_dict = {
+        "employee_id": staff_data.employee_id,
+        "department": staff_data.department,
+        "position": staff_data.position,
+        "hire_date": staff_data.hire_date,
+        "salary": staff_data.salary,
+        "shift_preferences": staff_data.shift_preferences,
+        "skills": staff_data.skills,
+        "certifications": staff_data.certifications,
+    }
+    staff = await service.create_staff(current_user.restaurant_id, u_dict, s_dict)
+    return StaffResponse.model_validate(staff)
 
-    # Check if PIN is unique in restaurant
-    stmt = select(Staff).where(Staff.restaurant_id == current_user.restaurant_id)
-    result = await db.execute(stmt)
-    existing_staff = result.scalars().all()
-    for s in existing_staff:
-        if security.verify_pin(data.pin_code, s.pin_code):
-            raise HTTPException(status_code=400, detail="PIN code already in use by another staff member")
-            
-    new_staff = Staff(
-        restaurant_id=current_user.restaurant_id,
-        branch_id=branch_id,
-        full_name=data.full_name,
-        role=data.role,
-        role_type=getattr(data, 'role_type', 'waiter'),
-        shift=data.shift,
-        pin_code=security.get_password_hash(data.pin_code),
-        assigned_tables=data.assigned_tables,
-        kitchen_station=data.kitchen_station
-    )
-    db.add(new_staff)
-    await db.commit()
-    await db.refresh(new_staff)
-    return new_staff
-
-@router.post("/bulk")
-async def bulk_create_staff(
-    data: Union[List[schemas.StaffCreate], schemas.BulkStaffInput],
-    current_user: Staff = Depends(check_role(["owner"])),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Bulk create staff members in a transaction.
-    """
-    staff_items = data if isinstance(data, list) else data.staff
-    pins = [s.pin_code for s in staff_items]
-    if len(pins) != len(set(pins)):
-        raise HTTPException(status_code=400, detail="Duplicate PINs in request")
-        
-    for s_data in staff_items:
-        new_staff = Staff(
-            restaurant_id=current_user.restaurant_id,
-            full_name=s_data.full_name,
-            role=s_data.role,
-            shift=s_data.shift,
-            pin_code=security.get_password_hash(s_data.pin_code),
-            assigned_tables=s_data.assigned_tables,
-            kitchen_station=s_data.kitchen_station
-        )
-        db.add(new_staff)
-        
-    await db.commit()
-    return {"msg": f"Successfully created {len(staff_items)} staff members"}
-
-@router.get("/me", response_model=schemas.StaffRead)
-async def get_staff_me(
-    current_user: Staff = Depends(get_current_user)
-):
-    """
-    Get current logged in staff profile.
-    """
-    return current_user
-
-@router.get("/{staff_id}", response_model=schemas.StaffRead)
-async def get_staff_detail(
-    staff_id: str,
-    current_user: Staff = Depends(check_role(["owner", "manager"])),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Get staff member details.
-    """
-    stmt = select(Staff).where(
-        Staff.id == staff_id,
-        Staff.restaurant_id == current_user.restaurant_id
-    )
-    result = await db.execute(stmt)
-    staff = result.scalar_one_or_none()
-    if not staff:
-        raise HTTPException(status_code=404, detail="Staff not found")
-    return staff
-
-@router.put("/{staff_id}", response_model=schemas.StaffRead)
+@router.put("/{staff_id}", response_model=StaffResponse)
 async def update_staff(
-    staff_id: str,
-    data: schemas.StaffUpdate,
-    current_user: Staff = Depends(check_role(["owner", "manager"])),
+    staff_id: UUID,
+    staff_data: StaffUpdate,
+    current_user: User = Depends(require_permission("edit_staff")),
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Update staff member.
-    """
-    stmt = select(Staff).where(
-        Staff.id == staff_id,
-        Staff.restaurant_id == current_user.restaurant_id
+    """Update staff member details."""
+    service = StaffService(db)
+    staff = await service.update_staff(
+        staff_id,
+        current_user.restaurant_id,
+        staff_data.model_dump(exclude_unset=True)
     )
-    result = await db.execute(stmt)
-    staff = result.scalar_one_or_none()
     if not staff:
-        raise HTTPException(status_code=404, detail="Staff not found")
-        
-    for field, value in data.model_dump(exclude_unset=True).items():
-        setattr(staff, field, value)
-        
-    await db.commit()
-    await db.refresh(staff)
-    return staff
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Staff not found")
+    return StaffResponse.model_validate(staff)
 
-@router.delete("/{staff_id}")
+@router.delete("/{staff_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_staff(
-    staff_id: str,
-    current_user: Staff = Depends(check_role(["owner"])),
+    staff_id: UUID,
+    current_user: User = Depends(require_permission("delete_staff")),
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Soft delete a staff member.
-    """
-    stmt = select(Staff).where(
-        Staff.id == staff_id,
-        Staff.restaurant_id == current_user.restaurant_id
-    )
-    result = await db.execute(stmt)
-    staff = result.scalar_one_or_none()
-    if not staff:
-        raise HTTPException(status_code=404, detail="Staff not found")
-        
-    staff.is_active = False
-    db.add(ActivityLog(
-        restaurant_id=current_user.restaurant_id,
-        staff_id=current_user.id,
-        action=f"deleted_staff_{staff_id}"
-    ))
-    await db.commit()
-    return {"msg": "Staff deactivated"}
+    """Soft delete staff member."""
+    service = StaffService(db)
+    success = await service.delete_staff(staff_id, current_user.restaurant_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Staff not found")
+    return None
 
-@router.put("/{staff_id}/reset-pin")
-async def reset_pin(
-    staff_id: str,
-    new_pin: str = Body(..., embed=True),
-    current_user: Staff = Depends(check_role(["owner", "manager"])),
+@router.get("/{staff_id}/performance", response_model=Dict[str, Any])
+async def get_staff_performance(
+    staff_id: UUID,
+    period_start: Optional[date] = Query(None),
+    period_end: Optional[date] = Query(None),
+    current_user: User = Depends(require_permission("view_staff")),
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Reset staff PIN code.
-    """
-    if not new_pin.isdigit() or len(new_pin) < 4:
-        raise HTTPException(status_code=400, detail="Invalid PIN format")
-        
-    stmt = select(Staff).where(
-        Staff.id == staff_id,
-        Staff.restaurant_id == current_user.restaurant_id
+    """Get staff performance metrics."""
+    service = StaffService(db)
+    return await service.get_staff_performance(
+        staff_id,
+        current_user.restaurant_id,
+        period_start,
+        period_end
     )
-    result = await db.execute(stmt)
-    staff = result.scalar_one_or_none()
-    if not staff:
-        raise HTTPException(status_code=404, detail="Staff not found")
-        
-    staff.pin_code = security.get_password_hash(new_pin)
-    await db.commit()
-    return {"msg": "PIN reset successful"}
-
