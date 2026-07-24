@@ -84,6 +84,7 @@ async def register(data: UserRegisterRequest, db: AsyncSession = Depends(get_db)
     restaurant = Restaurant(
         name=data.restaurant_name.strip(),
         slug=slug_clean,
+        subdomain=slug_clean,
         size=size_enum,
         is_multi_branch=is_multi
     )

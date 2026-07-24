@@ -25,6 +25,11 @@ class Restaurant(Base):
         nullable=False,
         index=True
     )
+    subdomain = Column(
+        String(100),
+        nullable=True,
+        index=True
+    )
     size = Column(
         SQLEnum(RestaurantSize, name="restaurantsize", create_type=False),
         default=RestaurantSize.SMALL,
