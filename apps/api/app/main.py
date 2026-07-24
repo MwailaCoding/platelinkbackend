@@ -22,11 +22,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("platelink_api")
 
-async def apply_schema_migrations(conn):
+async def apply_schema_migrations():
     """Safely apply missing columns to existing PostgreSQL tables on Render."""
     migration_sqls = [
-        "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'restaurantsize') THEN CREATE TYPE restaurantsize AS ENUM ('small', 'medium', 'large', 'enterprise'); END IF; END $$;",
-        "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS size restaurantsize NOT NULL DEFAULT 'medium';",
+        "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS size VARCHAR(50) NOT NULL DEFAULT 'medium';",
         "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_multi_branch BOOLEAN NOT NULL DEFAULT FALSE;",
         "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS type VARCHAR(50) NOT NULL DEFAULT 'casual_dining';",
         "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS parent_restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL;",
@@ -35,9 +34,11 @@ async def apply_schema_migrations(conn):
     ]
     for sql in migration_sqls:
         try:
-            await conn.execute(text(sql))
+            async with engine.begin() as conn:
+                await conn.execute(text(sql))
+            logger.info(f"Successfully executed schema migration: {sql}")
         except Exception as e:
-            logger.warning(f"Migration statement notice: {e}")
+            logger.warning(f"Migration statement notice for [{sql}]: {e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,7 +49,7 @@ async def lifespan(app: FastAPI):
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-            await apply_schema_migrations(conn)
+        await apply_schema_migrations()
         logger.info("Database tables and schema migrations verified successfully.")
     except Exception as err:
         logger.error(f"Error initializing database schema: {err}")

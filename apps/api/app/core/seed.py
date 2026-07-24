@@ -110,7 +110,7 @@ async def seed_default_permissions(db: AsyncSession) -> List[Permission]:
     for item in DEFAULT_PERMISSIONS:
         stmt = select(Permission).where(Permission.name == item["name"])
         res = await db.execute(stmt)
-        existing = res.scalar_one_or_none()
+        existing = res.scalars().first()
         if not existing:
             perm = Permission(**item)
             db.add(perm)
@@ -133,7 +133,7 @@ async def seed_system_roles(db: AsyncSession) -> List[Role]:
     for r_data in SYSTEM_ROLES:
         stmt = select(Role).where(Role.restaurant_id.is_(None), Role.name == r_data["name"])
         res = await db.execute(stmt)
-        existing = res.scalar_one_or_none()
+        existing = res.scalars().first()
         if not existing:
             role = Role(**r_data)
             # Assign relevant permissions to system role
