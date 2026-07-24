@@ -30,6 +30,9 @@ class UserRegisterRequest(BaseModel):
     restaurant_size: Optional[str] = "medium"
     restaurant_type: Optional[str] = "single"
 
+# Alias for backwards compatibility with live Render API schema
+UserRegister = UserRegisterRequest
+
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
