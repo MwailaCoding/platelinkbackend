@@ -7,8 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from apps.api.app.api.v1.api import api_router
-from apps.api.app.core.database import async_session_local
+from apps.api.app.core.database import engine, async_session_local
 from apps.api.app.core.seed import seed_initial_data
+from apps.api.app.models.base import Base
+# Import all models to ensure they are registered on Base.metadata
+import apps.api.app.models  # noqa: F401
 
 load_dotenv()
 
@@ -22,10 +25,23 @@ logger = logging.getLogger("platelink_api")
 async def lifespan(app: FastAPI):
     """Application startup and shutdown events."""
     logger.info("Initializing PlateLink API Backend...")
-    # Seed default permissions and system roles on startup if configured
-    if os.getenv("SEED_ON_STARTUP", "false").lower() == "true":
+    
+    # 1. Automatically create all missing tables in database on startup
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables verified/created successfully.")
+    except Exception as err:
+        logger.error(f"Error creating database tables: {err}")
+
+    # 2. Seed default permissions and system roles on startup
+    try:
         async with async_session_local() as db:
             await seed_initial_data(db)
+        logger.info("Initial data seeded successfully.")
+    except Exception as err:
+        logger.error(f"Error seeding initial data: {err}")
+
     yield
     logger.info("Shutting down PlateLink API Backend.")
 
