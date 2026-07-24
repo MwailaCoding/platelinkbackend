@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 
-import jwt
+from jose import jwt
 import qrcode
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
