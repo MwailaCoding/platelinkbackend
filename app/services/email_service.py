@@ -50,7 +50,7 @@ class EmailService:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
             return False
 
-    def send_verification_email(
+    async def send_verification_email(
         self,
         to_email: Optional[str] = None,
         verification_code: Optional[str] = None,
@@ -135,7 +135,7 @@ support@platelink.africa
             return True
         return self._send_email(target_email, subject, html_body, text_body)
 
-    def send_owner_welcome_email(
+    async def send_owner_welcome_email(
         self,
         to_email: Optional[str] = None,
         owner_name: Optional[str] = None,
@@ -248,13 +248,13 @@ support@platelink.africa
             return True
         return self._send_email(target_email, subject, html_body, text_body)
 
-    def send_welcome_email(self, *args: Any, **kwargs: Any) -> bool:
+    async def send_welcome_email(self, *args: Any, **kwargs: Any) -> bool:
         """Alias for send_owner_welcome_email."""
-        return self.send_owner_welcome_email(*args, **kwargs)
+        return await self.send_owner_welcome_email(*args, **kwargs)
 
-    def send_verification_otp(self, *args: Any, **kwargs: Any) -> bool:
+    async def send_verification_otp(self, *args: Any, **kwargs: Any) -> bool:
         """Alias for send_verification_email."""
-        return self.send_verification_email(*args, **kwargs)
+        return await self.send_verification_email(*args, **kwargs)
 
     def send_staff_invite_email(
         self,
