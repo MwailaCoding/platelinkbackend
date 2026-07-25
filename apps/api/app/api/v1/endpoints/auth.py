@@ -62,9 +62,8 @@ async def register(
         prefix=uuid4().hex[:3].upper(),
         is_active=False,
         trial_ends_at=datetime.utcnow() + timedelta(days=14),
-        status=SubscriptionStatus.trial,
-        restaurant_type=data.restaurant_type,
-        is_multi_branch=(data.restaurant_type == 'multi_branch')
+        subscription_status=SubscriptionStatus.trial,
+        is_multi_branch=(getattr(data, 'restaurant_type', 'single') == 'multi_branch')
     )
     db.add(new_restaurant)
     await db.flush() # Get ID
