@@ -21,11 +21,14 @@ class TokenData(BaseModel):
 class UserRegister(BaseModel):
     restaurant_name: str
     subdomain: str
-    owner_name: str
+    owner_name: Optional[str] = "Admin"
     email: EmailStr
-    phone: str
+    phone: Optional[str] = None
     password: str
-    restaurant_type: str = "single"
+    restaurant_size: Optional[str] = "medium"
+    restaurant_type: Optional[str] = "single"
+    model_config = ConfigDict(extra="ignore")
+
 
 class UserLogin(BaseModel):
     email: EmailStr
