@@ -1,9 +1,10 @@
 """Email Service for sending clean, emoji-free transactional emails."""
 import logging
+import random
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Optional
+from typing import Optional, Any
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -16,6 +17,10 @@ class EmailService:
         self.smtp_password = settings.SMTP_PASSWORD
         self.from_email = settings.EMAILS_FROM_EMAIL or "noreply@platelink.africa"
         self.from_name = settings.EMAILS_FROM_NAME or "PlateLink Africa"
+
+    def generate_otp(self) -> str:
+        """Generate a random 6-digit verification code."""
+        return f"{random.randint(100000, 999999)}"
 
     def _send_email(self, to_email: str, subject: str, html_content: str, text_content: Optional[str] = None) -> bool:
         """Internal helper to send email via SMTP."""
@@ -45,19 +50,37 @@ class EmailService:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
             return False
 
-    def send_verification_email(self, to_email: str, verification_code: str, verification_url: str) -> bool:
+    def send_verification_email(
+        self,
+        to_email: Optional[str] = None,
+        verification_code: Optional[str] = None,
+        verification_url: Optional[str] = None,
+        email: Optional[str] = None,
+        name: Optional[str] = None,
+        otp_code: Optional[str] = None,
+        background_tasks: Any = None,
+        **kwargs: Any
+    ) -> bool:
         """Send verification code & link to user."""
-        subject = f"Verify your PlateLink account - Verification Code: {verification_code}"
+        target_email = to_email or email
+        code = verification_code or otp_code or self.generate_otp()
+        url = verification_url or f"https://admin.platelink.africa/verify-email?email={target_email}&code={code}"
+
+        if not target_email:
+            logger.error("No recipient email provided for send_verification_email")
+            return False
+
+        subject = f"Verify your PlateLink account - Verification Code: {code}"
         
         text_body = f"""
 Verify Your Email Address - PlateLink Africa
 
 Welcome to PlateLink Africa. Please verify your email address to activate your restaurant account.
 
-Your Verification Code: {verification_code}
+Your Verification Code: {code}
 
 Or click the link below to verify automatically:
-{verification_url}
+{url}
 
 This verification code will expire in 15 minutes.
 
@@ -88,13 +111,13 @@ support@platelink.africa
     <p>Welcome to <strong>PlateLink Africa</strong>. Please verify your email address to complete your registration and activate your restaurant account.</p>
     
     <div class="code-box">
-      <div class="otp-code">{verification_code}</div>
+      <div class="otp-code">{code}</div>
     </div>
 
     <p style="text-align: center;">Or click the button below to verify automatically:</p>
     
     <div style="text-align: center; margin: 20px 0;">
-      <a href="{verification_url}" class="btn">Verify Email Address</a>
+      <a href="{url}" class="btn">Verify Email Address</a>
     </div>
 
     <p style="font-size: 12px; color: #64748B;">This code and verification link will expire in <strong>15 minutes</strong>. If you did not create a PlateLink account, please ignore this email.</p>
@@ -107,33 +130,49 @@ support@platelink.africa
 </body>
 </html>"""
 
-        return self._send_email(to_email, subject, html_body, text_body)
+        if background_tasks:
+            background_tasks.add_task(self._send_email, target_email, subject, html_body, text_body)
+            return True
+        return self._send_email(target_email, subject, html_body, text_body)
 
     def send_owner_welcome_email(
         self,
-        to_email: str,
-        owner_name: str,
-        restaurant_name: str,
-        scale: str,
-        branch_structure: str,
-        dashboard_url: str
+        to_email: Optional[str] = None,
+        owner_name: Optional[str] = None,
+        restaurant_name: Optional[str] = None,
+        scale: str = "Medium",
+        branch_structure: str = "Single Outlet",
+        dashboard_url: Optional[str] = None,
+        email: Optional[str] = None,
+        name: Optional[str] = None,
+        background_tasks: Any = None,
+        **kwargs: Any
     ) -> bool:
         """Send welcoming email to restaurant owner after onboarding."""
-        subject = f"Welcome to PlateLink - {restaurant_name} Account Activated"
+        target_email = to_email or email
+        target_name = owner_name or name or "Owner"
+        rest_name = restaurant_name or "your restaurant"
+        url = dashboard_url or "https://admin.platelink.africa/dashboard"
+
+        if not target_email:
+            logger.error("No recipient email provided for send_owner_welcome_email")
+            return False
+
+        subject = f"Welcome to PlateLink - {rest_name} Account Activated"
         
         text_body = f"""
-Welcome to PlateLink, {owner_name}!
+Welcome to PlateLink, {target_name}!
 
-Congratulations! {restaurant_name} is now fully set up on PlateLink.
+Congratulations! {rest_name} is now fully set up on PlateLink.
 
 Setup Summary:
-- Restaurant Name: {restaurant_name}
+- Restaurant Name: {rest_name}
 - Establishment Scale: {scale.upper()}
 - Branch Structure: {branch_structure}
 - M-Pesa Express: Connected
 
 Access your Admin Dashboard here:
-{dashboard_url}
+{url}
 
 Next Steps:
 1. Print and place table QR stands.
@@ -164,14 +203,14 @@ support@platelink.africa
 <body>
   <div class="container">
     <span class="hero-badge">Onboarding Complete</span>
-    <h1>Welcome to PlateLink, {owner_name}</h1>
-    <p>Congratulations! <strong>{restaurant_name}</strong> is now live on PlateLink. Your digital menu, POS system, and M-Pesa payment gateway are ready to accept customer orders.</p>
+    <h1>Welcome to PlateLink, {target_name}</h1>
+    <p>Congratulations! <strong>{rest_name}</strong> is now live on PlateLink. Your digital menu, POS system, and M-Pesa payment gateway are ready to accept customer orders.</p>
 
     <div class="summary-card">
       <h3 style="color: #FFFFFF; margin-top: 0; font-size: 14px; border-bottom: 1px solid #334155; padding-bottom: 8px;">Your Setup Summary</h3>
       <div class="summary-row">
         <span style="color: #64748B;">Restaurant Name:</span>
-        <strong style="color: #FFFFFF;">{restaurant_name}</strong>
+        <strong style="color: #FFFFFF;">{rest_name}</strong>
       </div>
       <div class="summary-row">
         <span style="color: #64748B;">Establishment Scale:</span>
@@ -188,7 +227,7 @@ support@platelink.africa
     </div>
 
     <div style="text-align: center; margin: 28px 0;">
-      <a href="{dashboard_url}" class="btn">Open Admin Dashboard</a>
+      <a href="{url}" class="btn">Open Admin Dashboard</a>
     </div>
 
     <div style="background: rgba(249, 115, 22, 0.1); border-left: 4px solid #F97316; padding: 14px; border-radius: 8px; margin-top: 24px;">
@@ -204,7 +243,18 @@ support@platelink.africa
 </body>
 </html>"""
 
-        return self._send_email(to_email, subject, html_body, text_body)
+        if background_tasks:
+            background_tasks.add_task(self._send_email, target_email, subject, html_body, text_body)
+            return True
+        return self._send_email(target_email, subject, html_body, text_body)
+
+    def send_welcome_email(self, *args: Any, **kwargs: Any) -> bool:
+        """Alias for send_owner_welcome_email."""
+        return self.send_owner_welcome_email(*args, **kwargs)
+
+    def send_verification_otp(self, *args: Any, **kwargs: Any) -> bool:
+        """Alias for send_verification_email."""
+        return self.send_verification_email(*args, **kwargs)
 
     def send_staff_invite_email(
         self,
@@ -287,17 +337,4 @@ email_service = EmailService()
 
 class BrevoEmailService(EmailService):
     """Compatibility wrapper for BrevoEmailService expected by auth endpoints."""
-    def send_verification_otp(self, email: str, otp: str, verification_url: Optional[str] = None) -> bool:
-        url = verification_url or f"https://admin.platelink.africa/verify-email?email={email}&code={otp}"
-        return self.send_verification_email(email, otp, url)
-
-    def send_welcome_email(self, email: str, name: str, restaurant_name: str) -> bool:
-        return self.send_owner_welcome_email(
-            to_email=email,
-            owner_name=name,
-            restaurant_name=restaurant_name,
-            scale="medium",
-            branch_structure="Single Outlet",
-            dashboard_url="https://admin.platelink.africa/dashboard"
-        )
-
+    pass
