@@ -25,5 +25,6 @@ class RolePermission(Base):
         server_default=func.now()
     )
 
-    role: Mapped["Role"] = relationship("Role")
-    permission: Mapped["Permission"] = relationship("Permission")
+    role: Mapped["Role"] = relationship("Role", overlaps="permissions,roles")
+    permission: Mapped["Permission"] = relationship("Permission", overlaps="permissions,roles")
+

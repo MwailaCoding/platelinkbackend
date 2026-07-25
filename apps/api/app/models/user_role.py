@@ -31,9 +31,10 @@ class UserRole(Base):
         nullable=True
     )
 
-    user: Mapped["Staff"] = relationship("Staff", foreign_keys=[user_id])
-    role: Mapped["Role"] = relationship("Role")
-    assigner: Mapped[Optional["Staff"]] = relationship("Staff", foreign_keys=[assigned_by])
+    user: Mapped["Staff"] = relationship("Staff", foreign_keys=[user_id], overlaps="roles,users,staff")
+    role: Mapped["Role"] = relationship("Role", overlaps="roles,users,staff")
+    assigner: Mapped[Optional["Staff"]] = relationship("Staff", foreign_keys=[assigned_by], overlaps="roles,users,staff")
+
 
     __table_args__ = (
         Index("ix_user_roles_user_id", "user_id"),
