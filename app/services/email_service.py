@@ -284,3 +284,20 @@ support@platelink.africa
         return self._send_email(to_email, subject, html_body, text_body)
 
 email_service = EmailService()
+
+class BrevoEmailService(EmailService):
+    """Compatibility wrapper for BrevoEmailService expected by auth endpoints."""
+    def send_verification_otp(self, email: str, otp: str, verification_url: Optional[str] = None) -> bool:
+        url = verification_url or f"https://admin.platelink.africa/verify-email?email={email}&code={otp}"
+        return self.send_verification_email(email, otp, url)
+
+    def send_welcome_email(self, email: str, name: str, restaurant_name: str) -> bool:
+        return self.send_owner_welcome_email(
+            to_email=email,
+            owner_name=name,
+            restaurant_name=restaurant_name,
+            scale="medium",
+            branch_structure="Single Outlet",
+            dashboard_url="https://admin.platelink.africa/dashboard"
+        )
+
