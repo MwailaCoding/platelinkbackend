@@ -18,7 +18,11 @@ class Staff(Base):
     phone: Mapped[Optional[str]] = mapped_column(Text)
     role: Mapped[StaffRole] = mapped_column(PG_ENUM(StaffRole, name="staff_role_enum"), nullable=False)
     shift: Mapped[ShiftType] = mapped_column(PG_ENUM(ShiftType, name="shift_type_enum"), default=ShiftType.full)
-    pin_code: Mapped[str] = mapped_column(Text, nullable=False)
+    pin_code: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    cashier_pin: Mapped[Optional[str]] = mapped_column(String(4), nullable=True)
+    pin_set_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    pin_attempts: Mapped[int] = mapped_column(Integer, default=0, server_default='0', nullable=False)
+    pin_locked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     assigned_tables: Mapped[Optional[list]] = mapped_column(JSONB)
     kitchen_station: Mapped[Optional[str]] = mapped_column(Text)
     kitchen_station_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("kitchen_stations.id", ondelete="SET NULL"), nullable=True)
@@ -34,6 +38,7 @@ class Staff(Base):
     restaurant: Mapped["Restaurant"] = relationship(back_populates="staff")
     orders: Mapped[List["Order"]] = relationship(back_populates="staff")
     kitchen_station_rel: Mapped[Optional["KitchenStation"]] = relationship(back_populates="staff")
+    sessions: Mapped[List["CashierSession"]] = relationship("CashierSession", back_populates="user", cascade="all, delete-orphan")
 
 class StaffActivityLog(Base):
     __tablename__ = "staff_activity_logs"

@@ -10,10 +10,12 @@ from app.api.v1.endpoints.qr import qr_router
 from app.api.v1.endpoints.till import router as till_router
 from app.api.v1.endpoints.receipts import router as receipts_router
 from app.api.v1.endpoints.brand import brand_router
+from app.api.v1.endpoints.auth_cashier import cashier_auth_router
 
 api_router = APIRouter()
 
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(cashier_auth_router)
 api_router.include_router(restaurant.router, prefix="/restaurants", tags=["restaurants"])
 api_router.include_router(branches.router) # Prefix is defined in router itself
 api_router.include_router(staff.router, prefix="/staff", tags=["staff"])

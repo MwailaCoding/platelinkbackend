@@ -23,6 +23,7 @@ from app.models.analytics import LinkAnalytics
 from app.models.branch import Branches, Branch
 from app.models.cashier import CashierShift, PaymentTransaction, DigitalReceipt
 from app.models.brand import BrandSettings, Theme
+from app.models.session import CashierSession
 
 __all__ = [
     "Base", "Restaurant", "RestaurantSetting", "Staff", "StaffActivityLog",
@@ -36,7 +37,7 @@ __all__ = [
     "Role", "Permission", "UserRole", "RolePermission",
     "Link", "QRCode", "LinkAnalytics", "Branches", "Branch",
     "CashierShift", "PaymentTransaction", "DigitalReceipt",
-    "BrandSettings", "Theme"
+    "BrandSettings", "Theme", "CashierSession"
 ]
 
 

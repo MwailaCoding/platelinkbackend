@@ -36,6 +36,7 @@ class ReceiptChannel(str, Enum):
 class ShiftOpenRequest(BaseModel):
     terminal_id: str = "Terminal-1"
     opening_float: Decimal
+    pin_code: Optional[str] = None
     notes: Optional[str] = None
 
 class ShiftOpenResponse(BaseModel):

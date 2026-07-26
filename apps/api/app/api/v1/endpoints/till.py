@@ -14,7 +14,35 @@ from app.schemas.cashier import (
 )
 from app.services.till_service import till_service
 
+from pydantic import BaseModel
+from typing import List
+from sqlalchemy import select
+from app.models.branch import Branch
+
+class TerminalOption(BaseModel):
+    id: str
+    name: str
+
 router = APIRouter(prefix="/till", tags=["till"])
+
+@router.get("/terminals", response_model=List[TerminalOption])
+async def list_terminals(
+    db: AsyncSession = Depends(get_db)
+):
+    """List dynamic till terminals for restaurant."""
+    stmt = select(Branch).where(Branch.is_active == True)
+    res = await db.execute(stmt)
+    branches = res.scalars().all()
+    if branches:
+        return [
+            TerminalOption(id=f"POS-{b.id.hex[:6]}", name=f"{b.name} POS Counter")
+            for b in branches
+        ]
+    return [
+        TerminalOption(id="Terminal-Main", name="Main Till Counter"),
+        TerminalOption(id="Terminal-Bar", name="Bar & Drinks Counter"),
+        TerminalOption(id="Terminal-Terrace", name="Terrace / Outdoor POS"),
+    ]
 
 @router.post("/shift/open", response_model=ShiftOpenResponse)
 async def open_shift(
@@ -23,6 +51,8 @@ async def open_shift(
     db: AsyncSession = Depends(get_db)
 ):
     """Open a new till shift."""
+    if request.pin_code and current_user.pin_code and current_user.pin_code != request.pin_code:
+        raise HTTPException(status_code=400, detail="Invalid cashier 4-digit PIN code.")
     try:
         shift = await till_service.open_shift(
             db,
