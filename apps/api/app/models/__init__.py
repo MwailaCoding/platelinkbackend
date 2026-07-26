@@ -21,6 +21,7 @@ from app.models.link import Link
 from app.models.qr import QRCode
 from app.models.analytics import LinkAnalytics
 from app.models.branch import Branches, Branch
+from app.models.cashier import CashierShift, PaymentTransaction, DigitalReceipt
 
 __all__ = [
     "Base", "Restaurant", "RestaurantSetting", "Staff", "StaffActivityLog",
@@ -32,7 +33,8 @@ __all__ = [
     "TableStatus", "OrderStatus", "PaymentStatus", "PaymentMethod", 
     "CallStatus", "SessionStatus",
     "Role", "Permission", "UserRole", "RolePermission",
-    "Link", "QRCode", "LinkAnalytics", "Branches", "Branch"
+    "Link", "QRCode", "LinkAnalytics", "Branches", "Branch",
+    "CashierShift", "PaymentTransaction", "DigitalReceipt"
 ]
 
 

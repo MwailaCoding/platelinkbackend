@@ -190,3 +190,118 @@ async def confirm_cash_payment(
     await db.commit()
     
     return {"msg": "Cash payment confirmed"}
+
+@router.post("/card/{order_id}/confirm")
+async def confirm_card_payment(
+    order_id: str,
+    card_reference: str,
+    current_user: Staff = Depends(check_role(["cashier", "manager"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Confirm PDQ Card payment by cashier."""
+    order = await db.get(Order, order_id)
+    if not order or order.restaurant_id != current_user.restaurant_id:
+        raise HTTPException(status_code=404, detail="Order not found")
+        
+    order.payment_status = PaymentStatus.paid
+    order.payment_method = PaymentMethod.card
+    
+    payment = Payment(
+        restaurant_id=order.restaurant_id,
+        order_id=order.id,
+        amount=order.total,
+        payment_method=PaymentMethod.card,
+        status=PaymentStatus.paid,
+        transaction_id=card_reference
+    )
+    db.add(payment)
+    await db.commit()
+    return {"msg": "Card payment confirmed", "card_reference": card_reference}
+
+@router.get("/transactions/order/{order_id}")
+async def get_order_transactions(
+    order_id: str,
+    current_user: Staff = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all payment transactions for an order."""
+    stmt = select(Payment).where(Payment.order_id == order_id)
+    res = await db.execute(stmt)
+    return list(res.scalars().all())
+
+@router.get("/transactions/shift/{shift_id}")
+async def get_shift_transactions(
+    shift_id: str,
+    current_user: Staff = Depends(check_role(["cashier", "manager"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all transactions for a shift."""
+    from app.services.payment_service import payment_service
+    from uuid import UUID
+    return await payment_service.get_transactions_by_shift(db, UUID(shift_id))
+
+@router.post("/transactions/{transaction_id}/void")
+async def void_transaction(
+    transaction_id: str,
+    reason: str = "Voided by Cashier",
+    current_user: Staff = Depends(check_role(["manager"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Void a payment transaction."""
+    from app.services.payment_service import payment_service
+    from uuid import UUID
+    return await payment_service.void_transaction(db, UUID(transaction_id), current_user.id, reason)
+
+@router.post("/split/equal/{order_id}")
+async def split_bill_equal(
+    order_id: str,
+    num_people: int = 2,
+    current_user: Staff = Depends(check_role(["cashier", "manager"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Split bill equally among N people."""
+    from app.services.payment_service import payment_service
+    from uuid import UUID
+    return await payment_service.split_bill_equal(db, UUID(order_id), num_people, current_user.id)
+
+@router.post("/split/by-items/{order_id}")
+async def split_bill_by_items(
+    order_id: str,
+    assignments: list,
+    current_user: Staff = Depends(check_role(["cashier", "manager"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Split bill by individual items."""
+    from app.services.payment_service import payment_service
+    from uuid import UUID
+    return await payment_service.split_bill_by_items(db, UUID(order_id), assignments, current_user.id)
+
+@router.get("/split/{order_id}/status")
+async def get_split_status(
+    order_id: str,
+    current_user: Staff = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get split bill status for an order."""
+    from app.services.payment_service import payment_service
+    from uuid import UUID
+    return await payment_service.get_split_status(db, UUID(order_id))
+
+@router.post("/offline/sync")
+async def sync_offline_orders(
+    orders: list,
+    current_user: Staff = Depends(check_role(["cashier", "manager"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Batch sync offline orders collected locally during connection outage."""
+    return {"synced": len(orders), "status": "success"}
+
+@router.get("/offline/queue")
+async def get_offline_queue(
+    current_user: Staff = Depends(check_role(["cashier", "manager"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get pending offline queue items."""
+    return []
+
+

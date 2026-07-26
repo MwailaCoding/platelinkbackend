@@ -32,6 +32,9 @@ DEFAULT_PERMISSIONS = [
     {"name": "manage_settings", "resource": "settings", "action": "manage", "category": "settings", "description": "Manage restaurant profile and settings"},
     {"name": "view_links", "resource": "links", "action": "read", "category": "links", "description": "View restaurant links, custom domain, and QR codes"},
     {"name": "manage_links", "resource": "links", "action": "manage", "category": "links", "description": "Create, edit, or delete links, custom domain, and QR codes"},
+    {"name": "manage_till", "resource": "till", "action": "manage", "category": "payments", "description": "Open/close shift and manage till reconciliation"},
+    {"name": "view_receipts", "resource": "receipts", "action": "read", "category": "payments", "description": "View and generate digital receipts"},
+    {"name": "split_bills", "resource": "payments", "action": "manage", "category": "payments", "description": "Split bills into multiple guest checks"},
 ]
 
 DEFAULT_ROLES = [
