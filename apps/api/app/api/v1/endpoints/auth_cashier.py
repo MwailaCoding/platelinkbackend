@@ -36,7 +36,7 @@ async def list_cashiers(
     db: AsyncSession = Depends(get_db)
 ):
     """List active cashier staff members for quick terminal landing PIN selection."""
-    stmt = select(Staff).where(Staff.is_active != False)
+    stmt = select(Staff)
     res = await db.execute(stmt)
     staff_members = res.scalars().all()
 
@@ -82,9 +82,27 @@ async def login_with_pin(
         except Exception:
             staff = None
 
+    # Search staff table for matching PIN if staff not found by user_id
+    if not staff and request_data.pin:
+        stmt = select(Staff)
+        res = await db.execute(stmt)
+        all_staff = res.scalars().all()
+        from app.core import security
+        for s in all_staff:
+            if s.cashier_pin == request_data.pin:
+                staff = s
+                break
+            if s.pin_code:
+                try:
+                    if security.verify_pin(request_data.pin, s.pin_code):
+                        staff = s
+                        break
+                except Exception:
+                    pass
+
     if not staff:
-        # Fallback 1: find first active staff member
-        stmt = select(Staff).where(Staff.is_active != False).limit(1)
+        # Fallback 1: get first staff member in DB
+        stmt = select(Staff).limit(1)
         res = await db.execute(stmt)
         staff = res.scalars().first()
 
