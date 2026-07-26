@@ -57,6 +57,10 @@ async def create_staff(
         role_type=getattr(data, 'role_type', 'waiter'),
         shift=data.shift,
         pin_code=security.get_password_hash(data.pin_code),
+        cashier_pin=data.pin_code,
+        is_active=True,
+        pin_attempts=0,
+        pin_locked_at=None,
         assigned_tables=data.assigned_tables,
         kitchen_station=data.kitchen_station
     )
@@ -198,6 +202,10 @@ async def reset_pin(
         raise HTTPException(status_code=404, detail="Staff not found")
         
     staff.pin_code = security.get_password_hash(new_pin)
+    staff.cashier_pin = new_pin
+    staff.pin_attempts = 0
+    staff.pin_locked_at = None
+    staff.is_active = True
     await db.commit()
     return {"msg": "PIN reset successful"}
 
