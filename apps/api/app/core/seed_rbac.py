@@ -30,6 +30,8 @@ DEFAULT_PERMISSIONS = [
     {"name": "view_reports", "resource": "reports", "action": "read", "category": "reports", "description": "View daily sales and staff reports"},
     {"name": "export_reports", "resource": "reports", "action": "export", "category": "reports", "description": "Export analytics and financial reports"},
     {"name": "manage_settings", "resource": "settings", "action": "manage", "category": "settings", "description": "Manage restaurant profile and settings"},
+    {"name": "view_links", "resource": "links", "action": "read", "category": "links", "description": "View restaurant links, custom domain, and QR codes"},
+    {"name": "manage_links", "resource": "links", "action": "manage", "category": "links", "description": "Create, edit, or delete links, custom domain, and QR codes"},
 ]
 
 DEFAULT_ROLES = [
@@ -54,7 +56,8 @@ DEFAULT_ROLES = [
             "view_tables", "manage_tables",
             "view_shifts", "manage_shifts",
             "process_payments",
-            "view_reports", "export_reports"
+            "view_reports", "export_reports",
+            "view_links", "manage_links"
         ]
     },
     {
