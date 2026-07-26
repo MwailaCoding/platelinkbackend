@@ -55,7 +55,18 @@ class PinAuthService:
         target_pin = staff.cashier_pin or staff.pin_code
         hashed_pin = self._hash_pin(pin)
 
-        is_match = (target_pin == pin) or (staff.pin_code == hashed_pin)
+        is_match = False
+        if staff.cashier_pin:
+            is_match = (staff.cashier_pin == pin) or (staff.cashier_pin == hashed_pin)
+        
+        if not is_match and staff.pin_code:
+            is_match = (staff.pin_code == pin) or (staff.pin_code == hashed_pin)
+            if not is_match:
+                try:
+                    from app.core import security
+                    is_match = security.verify_pin(pin, staff.pin_code)
+                except Exception:
+                    pass
 
         if not is_match:
             staff.pin_attempts = (staff.pin_attempts or 0) + 1
