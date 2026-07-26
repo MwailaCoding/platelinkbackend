@@ -20,6 +20,7 @@ from app.models.role_permission import RolePermission
 from app.models.link import Link
 from app.models.qr import QRCode
 from app.models.analytics import LinkAnalytics
+from app.models.branch import Branches, Branch
 
 __all__ = [
     "Base", "Restaurant", "RestaurantSetting", "Staff", "StaffActivityLog",
@@ -31,6 +32,7 @@ __all__ = [
     "TableStatus", "OrderStatus", "PaymentStatus", "PaymentMethod", 
     "CallStatus", "SessionStatus",
     "Role", "Permission", "UserRole", "RolePermission",
-    "Link", "QRCode", "LinkAnalytics"
+    "Link", "QRCode", "LinkAnalytics", "Branches", "Branch"
 ]
+
 
