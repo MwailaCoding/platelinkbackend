@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     auth, restaurant, staff, tables, menu, customer, orders, kitchen, kitchen_admin, waiter, analytics, public, expediter
 )
-from app.api.v1.routes import payments, webhooks, menu_ai, floor_plan, settings, reservations, branches
+from app.api.v1.routes import payments, webhooks, menu_ai, branches
 
 from app.api.v1.endpoints.links import links_router
 from app.api.v1.endpoints.qr import qr_router
@@ -32,9 +32,6 @@ api_router.include_router(payments.router, prefix="/payments", tags=["payments"]
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 api_router.include_router(public.router, prefix="/public", tags=["public"])
-api_router.include_router(floor_plan.router, tags=["floor_plan"])
-api_router.include_router(settings.router, tags=["settings"])
-api_router.include_router(reservations.router, tags=["reservations"])
 api_router.include_router(links_router)
 api_router.include_router(qr_router)
 api_router.include_router(till_router)

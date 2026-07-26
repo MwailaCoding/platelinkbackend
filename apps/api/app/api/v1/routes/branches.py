@@ -7,7 +7,7 @@ from pydantic import BaseModel
 import uuid
 
 from app.core.deps import get_db
-from models import Branches, Restaurant, Staff, Table, MenuItem, Order
+from app.models import Branches, Restaurant, Staff, Table, MenuItem, Order
 from app.core.deps import get_current_active_staff as get_current_staff
 
 router = APIRouter(prefix="/branches", tags=["Branches"])

@@ -11,8 +11,7 @@ from redis.asyncio import Redis
 from app.core import security
 from app.core.config import settings
 from app.core.deps import get_db, get_redis, get_current_user, reusable_oauth2
-from app.models import Restaurant, Staff, StaffRole, ActivityLog, SubscriptionStatus
-from models import Branches
+from app.models import Restaurant, Staff, StaffRole, ActivityLog, SubscriptionStatus, Branches
 from app.schemas import schemas
 from app.services.email_service import BrevoEmailService
 from app.services.email import EmailService

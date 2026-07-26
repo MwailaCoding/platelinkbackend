@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
-from sqlalchemy import text, Text, Boolean, DateTime, func, ForeignKey, CheckConstraint
+from sqlalchemy import text, Text, String, Integer, Boolean, DateTime, func, ForeignKey, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, ENUM as PG_ENUM, JSONB
 from app.models.base import Base

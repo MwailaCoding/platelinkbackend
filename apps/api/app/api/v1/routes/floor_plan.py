@@ -6,7 +6,7 @@ import json
 from pydantic import BaseModel
 
 from app.core.deps import get_db
-from models import Restaurant, Floors, Table as Tables, FloorElements
+from app.models import Restaurant, Floors, Table as Tables, FloorElements
 from app.core.deps import get_current_user as get_current_restaurant
 
 router = APIRouter(prefix="/floor-plan", tags=["Floor Plan"])

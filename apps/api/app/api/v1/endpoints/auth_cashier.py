@@ -293,6 +293,8 @@ async def lock_session(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+cashier_auth_router = router
+
 @router.post("/unlock-session")
 async def unlock_session(
     request_data: UnlockSessionRequest,

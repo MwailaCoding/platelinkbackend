@@ -6,7 +6,7 @@ import json
 from pydantic import BaseModel
 
 from app.core.deps import get_db
-from models import Restaurant, Table as Tables, Reservations, Waitlist, ReservationTimeSlots, Staff
+from app.models import Restaurant, Table as Tables, Reservations, Waitlist, ReservationTimeSlots, Staff
 from app.core.deps import get_current_user as get_current_restaurant, get_current_active_staff as get_current_staff
 
 router = APIRouter(prefix="/reservations", tags=["Reservations"])

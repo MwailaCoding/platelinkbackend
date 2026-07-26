@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from app.core.deps import get_db
-from models import Restaurant, RestaurantSetting
+from app.models import Restaurant, RestaurantSetting
 from app.core.deps import get_current_user as get_current_restaurant
 
 router = APIRouter(tags=["Settings"])
