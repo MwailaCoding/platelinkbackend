@@ -5,7 +5,7 @@ from uuid import UUID
 from datetime import datetime
 
 class PinLoginRequest(BaseModel):
-    user_id: UUID
+    user_id: Optional[Any] = None
     pin: str = Field(..., min_length=4, max_length=4, pattern="^[0-9]{4}$")
     terminal_id: Optional[str] = "Terminal-1"
 

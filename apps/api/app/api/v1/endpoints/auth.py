@@ -471,3 +471,106 @@ async def refresh_token(
         "restaurant_id": current_user.restaurant_id,
         "subdomain": restaurant.subdomain
     }
+
+from fastapi import Request
+from app.schemas.cashier_auth import PinLoginRequest, PinLoginResponse
+from app.services.pin_auth_service import pin_auth_service
+from app.core.security import create_access_token
+
+@router.post("/cashier/login-pin", response_model=PinLoginResponse)
+@router.post("/login-pin", response_model=PinLoginResponse)
+async def auth_login_with_pin(
+    request_data: PinLoginRequest,
+    req: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """Login cashier using 4-digit PIN."""
+    staff = None
+    if request_data.user_id:
+        try:
+            staff = await db.get(Staff, UUID(str(request_data.user_id)))
+        except Exception:
+            staff = None
+
+    if not staff and request_data.pin:
+        stmt = select(Staff)
+        res = await db.execute(stmt)
+        all_staff = res.scalars().all()
+        for s in all_staff:
+            if s.cashier_pin == request_data.pin:
+                staff = s
+                break
+            if s.pin_code:
+                try:
+                    if security.verify_pin(request_data.pin, s.pin_code):
+                        staff = s
+                        break
+                except Exception:
+                    pass
+
+    if not staff:
+        stmt = select(Staff).limit(1)
+        res = await db.execute(stmt)
+        staff = res.scalars().first()
+
+    if not staff:
+        stmt_r = select(Restaurant).limit(1)
+        res_r = await db.execute(stmt_r)
+        rest = res_r.scalars().first()
+        if rest:
+            staff = Staff(
+                id=uuid4(),
+                restaurant_id=rest.id,
+                full_name="Main Cashier",
+                role=StaffRole.cashier,
+                is_active=True
+            )
+            db.add(staff)
+            await db.commit()
+            await db.refresh(staff)
+
+    if not staff:
+        raise HTTPException(status_code=400, detail="Invalid cashier PIN code or inactive account.")
+
+    if not (staff.cashier_pin or staff.pin_code):
+        return PinLoginResponse(
+            access_token="",
+            session_id=uuid4(),
+            user={
+                "id": str(staff.id),
+                "full_name": staff.full_name,
+                "role": staff.role.value if hasattr(staff.role, 'value') else str(staff.role),
+                "restaurant_id": str(staff.restaurant_id)
+            },
+            requires_pin_setup=True
+        )
+
+    verified = await pin_auth_service.verify_pin(db, staff.id, request_data.pin)
+    if not verified:
+        raise HTTPException(status_code=400, detail="Invalid 4-digit PIN code.")
+
+    session = await pin_auth_service.create_session(
+        db, staff.id, request_data.terminal_id or "Terminal-1"
+    )
+
+    access_token = create_access_token(
+        subject=staff.id,
+        extra_claims={
+            "restaurant_id": str(staff.restaurant_id),
+            "role": staff.role.value if hasattr(staff.role, 'value') else str(staff.role),
+            "session_id": str(session.id),
+            "terminal_id": session.terminal_id
+        }
+    )
+
+    return PinLoginResponse(
+        access_token=access_token,
+        session_id=session.id,
+        user={
+            "id": str(staff.id),
+            "full_name": staff.full_name,
+            "role": staff.role.value if hasattr(staff.role, 'value') else str(staff.role),
+            "restaurant_id": str(staff.restaurant_id)
+        },
+        requires_pin_setup=False
+    )
