@@ -188,7 +188,12 @@ async def staff_login(
         if not restaurant:
             raise HTTPException(status_code=404, detail="Restaurant not found")
     else:
-        raise HTTPException(status_code=400, detail="restaurant_id or restaurant_slug is required")
+        stmt_r = select(Restaurant).limit(1)
+        res_r = await db.execute(stmt_r)
+        restaurant = res_r.scalars().first()
+        if not restaurant:
+            raise HTTPException(status_code=400, detail="restaurant_id or restaurant_slug is required")
+        restaurant_id = restaurant.id
 
     stmt = select(Staff).where(
         Staff.restaurant_id == restaurant_id,
