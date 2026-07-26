@@ -2,6 +2,7 @@
 import logging
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db, get_current_user
