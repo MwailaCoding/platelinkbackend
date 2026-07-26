@@ -6,7 +6,7 @@ services:
     name: platelink-backend
     runtime: python
     pythonVersion: "3.11.9"
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: "pip install -r requirements.txt && alembic upgrade head"
     startCommand: "gunicorn -c gunicorn_conf.py app.main:app"
     healthCheckPath: /health
     autoDeploy: true

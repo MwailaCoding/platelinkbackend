@@ -26,11 +26,12 @@ async def lifespan(app: FastAPI):
     print("PLATELINK AFRICA BACKEND STARTING UP")
     print("="*50)
 
-    # 1. Check Database
+    # 1. Check Database and create missing tables
     try:
-        async with engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
-        logger.info("Database Connection: STABLE")
+        from app.models.base import Base
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database Connection & Tables: STABLE")
     except Exception as e:
         logger.error(f"Database Connection: FAILED -> {e}")
 
