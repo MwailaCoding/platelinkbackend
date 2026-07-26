@@ -60,8 +60,8 @@ async def get_current_shift(
     current_user: Staff = Depends(require_permission("manage_till")),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get current active open shift for terminal."""
-    shift = await till_service.get_current_shift(db, terminal_id)
+    """Get current active open shift for terminal and cashier."""
+    shift = await till_service.get_current_shift(db, terminal_id=terminal_id, cashier_id=current_user.id)
     return shift
 
 @router.get("/shift/{shift_id}", response_model=ShiftSummaryResponse)

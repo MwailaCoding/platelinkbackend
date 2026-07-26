@@ -28,16 +28,16 @@ class TillService:
         opening_float: Decimal,
         notes: Optional[str] = None
     ) -> CashierShift:
-        """Open a new till shift."""
-        # Check if terminal already has an open shift
+        """Open a new till shift for a specific cashier/restaurant."""
+        # Check if cashier already has an active open shift
         stmt = select(CashierShift).where(
-            CashierShift.terminal_id == terminal_id,
+            CashierShift.cashier_id == cashier_id,
             CashierShift.status == ShiftStatus.OPEN.value
         )
         res = await db.execute(stmt)
         existing = res.scalar_one_or_none()
         if existing:
-            raise ValueError(f"Terminal {terminal_id} already has an active open shift.")
+            raise ValueError(f"Cashier already has an active open shift on terminal {existing.terminal_id}.")
 
         shift = CashierShift(
             terminal_id=terminal_id,
@@ -51,12 +51,21 @@ class TillService:
         await db.refresh(shift)
         return shift
 
-    async def get_current_shift(self, db: AsyncSession, terminal_id: str) -> Optional[CashierShift]:
-        """Get active open shift for terminal."""
+    async def get_current_shift(
+        self,
+        db: AsyncSession,
+        terminal_id: str = "Terminal-1",
+        cashier_id: Optional[UUID] = None
+    ) -> Optional[CashierShift]:
+        """Get active open shift for terminal and cashier."""
         stmt = select(CashierShift).where(
-            CashierShift.terminal_id == terminal_id,
             CashierShift.status == ShiftStatus.OPEN.value
         )
+        if cashier_id:
+            stmt = stmt.where(CashierShift.cashier_id == cashier_id)
+        else:
+            stmt = stmt.where(CashierShift.terminal_id == terminal_id)
+
         res = await db.execute(stmt)
         return res.scalar_one_or_none()
 

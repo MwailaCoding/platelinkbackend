@@ -14,6 +14,7 @@ from app.schemas.link import LinkCreate, LinkUpdate, StaffAccessLinks, LinkType
 from app.schemas.analytics import AnalyticsSummary, AnalyticsSource
 from app.services.domain_service import domain_service
 from app.services.qr_service import qr_service
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +89,12 @@ class LinkService:
         """Get staff access URLs for waiter, kitchen, and cashier."""
         restaurant = await db.get(Restaurant, restaurant_id)
         sub = restaurant.subdomain if restaurant else "app"
+        domain = getattr(settings, "BASE_DOMAIN", "platelink.africa")
 
         return StaffAccessLinks(
-            waiter=f"https://{sub}.platelink.africa/waiter",
-            kitchen=f"https://{sub}.platelink.africa/kitchen",
-            cashier=f"https://{sub}.platelink.africa/cashier"
+            waiter=f"https://{sub}.{domain}/waiter",
+            kitchen=f"https://{sub}.{domain}/kitchen",
+            cashier=f"https://{sub}.{domain}/cashier"
         )
 
     async def get_primary_link(self, db: AsyncSession, restaurant_id: UUID) -> Optional[Link]:
