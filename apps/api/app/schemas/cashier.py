@@ -32,6 +32,42 @@ class ReceiptChannel(str, Enum):
     EMAIL = "email"
     PRINT = "print"
 
+class DrawerActionType(str, Enum):
+    DROP = "drop"       # Safe cash drop
+    PAYOUT = "payout"   # Petty cash payout
+    FLOAT_IN = "float_in" # Additional float added
+
+# Drawer Action Schemas
+class DrawerActionRequest(BaseModel):
+    shift_id: UUID
+    action_type: DrawerActionType
+    amount: Decimal
+    reason: str
+
+class DrawerActionResponse(BaseModel):
+    id: UUID
+    shift_id: UUID
+    action_type: DrawerActionType
+    amount: Decimal
+    reason: str
+    processed_by: Optional[UUID] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Mixed Tender Payment Schemas
+class MixedPaymentItem(BaseModel):
+    method: PaymentMethod
+    amount: Decimal
+    phone_number: Optional[str] = None
+    card_reference: Optional[str] = None
+    cash_received: Optional[Decimal] = None
+
+class MixedPaymentRequest(BaseModel):
+    order_id: UUID
+    payments: List[MixedPaymentItem]
+    notes: Optional[str] = None
+
 # Shift Schemas
 class ShiftOpenRequest(BaseModel):
     terminal_id: str = "Terminal-1"
@@ -154,7 +190,7 @@ class TransactionListResponse(BaseModel):
     page: int
     per_page: int
 
-# Z-Report Schemas
+# Z-Report & X-Report Schemas
 class ZReportResponse(BaseModel):
     shift_id: UUID
     generated_at: datetime
@@ -163,6 +199,21 @@ class ZReportResponse(BaseModel):
     payment_method_breakdown: Dict[str, Decimal]
     hourly_breakdown: List[Dict[str, Any]]
     status: str
+
+class XReportResponse(BaseModel):
+    shift_id: UUID
+    generated_at: datetime
+    opening_float: Decimal
+    cash_sales: Decimal
+    mpesa_sales: Decimal
+    card_sales: Decimal
+    total_sales: Decimal
+    total_drops: Decimal
+    total_payouts: Decimal
+    total_float_in: Decimal
+    expected_cash_on_hand: Decimal
+    transaction_count: int
+    drawer_actions: List[Dict[str, Any]]
 
 # Receipt Schemas
 class DigitalReceiptRequest(BaseModel):

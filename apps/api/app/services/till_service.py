@@ -231,4 +231,62 @@ class TillService:
             status=summary.closed_at and "CLOSED" or "ACTIVE"
         )
 
+    async def record_drawer_action(
+        self,
+        db: AsyncSession,
+        shift_id: UUID,
+        action_type: str,
+        amount: Decimal,
+        reason: str,
+        processed_by: Optional[UUID] = None
+    ) -> Dict[str, Any]:
+        """Record mid-shift cash drop, float addition, or petty cash payout."""
+        shift = await db.get(CashierShift, shift_id)
+        if not shift or shift.status != ShiftStatus.OPEN.value:
+            raise ValueError("Till shift is not active")
+
+        action_data = {
+            "id": str(uuid4()),
+            "shift_id": str(shift_id),
+            "action_type": action_type,
+            "amount": float(amount),
+            "reason": reason,
+            "processed_by": str(processed_by) if processed_by else None,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+
+        current_notes = shift.notes or ""
+        shift.notes = f"{current_notes}\n[{action_type.upper()}] KES {amount}: {reason}".strip()
+        await db.commit()
+        await db.refresh(shift)
+
+        return action_data
+
+    async def generate_x_report(self, db: AsyncSession, shift_id: UUID) -> Dict[str, Any]:
+        """Generate mid-shift X-Report snapshot without closing till."""
+        summary = await self.get_shift_summary(db, shift_id)
+        shift = await db.get(CashierShift, shift_id)
+
+        actions = []
+        if shift and shift.notes:
+            for line in shift.notes.split('\n'):
+                if '[' in line and ']' in line and 'KES' in line:
+                    actions.append({"log": line})
+
+        return {
+            "shift_id": str(shift_id),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "opening_float": float(summary.opening_float),
+            "cash_sales": float(summary.cash_sales),
+            "mpesa_sales": float(summary.mpesa_sales),
+            "card_sales": float(summary.card_sales),
+            "total_sales": float(summary.total_sales),
+            "total_drops": 0.0,
+            "total_payouts": 0.0,
+            "total_float_in": 0.0,
+            "expected_cash_on_hand": float(summary.expected_cash),
+            "transaction_count": summary.transaction_count,
+            "drawer_actions": actions
+        }
+
 till_service = TillService()

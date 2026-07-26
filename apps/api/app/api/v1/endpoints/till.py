@@ -10,7 +10,8 @@ from app.models.staff import Staff
 from app.schemas.cashier import (
     ShiftOpenRequest, ShiftOpenResponse,
     ShiftCloseRequest, ShiftCloseResponse,
-    ShiftSummaryResponse, ZReportResponse
+    ShiftSummaryResponse, ZReportResponse,
+    DrawerActionRequest, DrawerActionResponse, XReportResponse
 )
 from app.services.till_service import till_service
 
@@ -115,5 +116,36 @@ async def generate_z_report(
     """Generate Z-Report for end-of-shift reconciliation."""
     try:
         return await till_service.generate_z_report(db, shift_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/shift/drawer-action", response_model=DrawerActionResponse)
+async def record_drawer_action(
+    request: DrawerActionRequest,
+    current_user: Staff = Depends(require_permission("manage_till")),
+    db: AsyncSession = Depends(get_db)
+):
+    """Record mid-shift cash drop, float addition, or petty cash payout."""
+    try:
+        return await till_service.record_drawer_action(
+            db,
+            shift_id=request.shift_id,
+            action_type=request.action_type.value,
+            amount=request.amount,
+            reason=request.reason,
+            processed_by=current_user.id
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/shift/{shift_id}/x-report", response_model=XReportResponse)
+async def generate_x_report(
+    shift_id: UUID,
+    current_user: Staff = Depends(require_permission("manage_till")),
+    db: AsyncSession = Depends(get_db)
+):
+    """Generate mid-shift X-Report snapshot without closing till."""
+    try:
+        return await till_service.generate_x_report(db, shift_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
