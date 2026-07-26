@@ -35,6 +35,8 @@ DEFAULT_PERMISSIONS = [
     {"name": "manage_till", "resource": "till", "action": "manage", "category": "payments", "description": "Open/close shift and manage till reconciliation"},
     {"name": "view_receipts", "resource": "receipts", "action": "read", "category": "payments", "description": "View and generate digital receipts"},
     {"name": "split_bills", "resource": "payments", "action": "manage", "category": "payments", "description": "Split bills into multiple guest checks"},
+    {"name": "view_brand", "resource": "brand", "action": "read", "category": "settings", "description": "View brand settings"},
+    {"name": "manage_brand", "resource": "brand", "action": "manage", "category": "settings", "description": "Manage brand settings"},
 ]
 
 DEFAULT_ROLES = [
@@ -60,7 +62,8 @@ DEFAULT_ROLES = [
             "view_shifts", "manage_shifts",
             "process_payments",
             "view_reports", "export_reports",
-            "view_links", "manage_links"
+            "view_links", "manage_links",
+            "view_brand", "manage_brand"
         ]
     },
     {

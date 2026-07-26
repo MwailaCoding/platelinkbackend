@@ -43,6 +43,8 @@ class Restaurant(Base):
     kra_pin: Mapped[Optional[str]] = mapped_column(Text)
     city: Mapped[Optional[str]] = mapped_column(Text)
     deleted_by: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True)
+    brand_settings_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("brand_settings.id", ondelete="SET NULL"), nullable=True)
+    selected_theme_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("themes.id", ondelete="SET NULL"), nullable=True)
 
     # Relationships
     staff: Mapped[List["Staff"]] = relationship(back_populates="restaurant", cascade="all, delete-orphan")
@@ -52,6 +54,8 @@ class Restaurant(Base):
     orders: Mapped[List["Order"]] = relationship(back_populates="restaurant", cascade="all, delete-orphan")
     settings: Mapped[List["RestaurantSetting"]] = relationship(back_populates="restaurant", cascade="all, delete-orphan")
     kitchen_stations: Mapped[List["KitchenStation"]] = relationship(back_populates="restaurant", cascade="all, delete-orphan")
+    brand_settings: Mapped[Optional["BrandSettings"]] = relationship("BrandSettings", back_populates="restaurant", uselist=False, foreign_keys="[BrandSettings.restaurant_id]")
+    selected_theme: Mapped[Optional["Theme"]] = relationship("Theme", foreign_keys=[selected_theme_id])
 
 class RestaurantSetting(Base):
     __tablename__ = "restaurant_settings"

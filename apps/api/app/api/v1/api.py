@@ -9,6 +9,7 @@ from app.api.v1.endpoints.links import links_router
 from app.api.v1.endpoints.qr import qr_router
 from app.api.v1.endpoints.till import router as till_router
 from app.api.v1.endpoints.receipts import router as receipts_router
+from app.api.v1.endpoints.brand import brand_router
 
 api_router = APIRouter()
 
@@ -36,6 +37,7 @@ api_router.include_router(links_router)
 api_router.include_router(qr_router)
 api_router.include_router(till_router)
 api_router.include_router(receipts_router)
+api_router.include_router(brand_router)
 
 
 

@@ -22,6 +22,7 @@ from app.models.qr import QRCode
 from app.models.analytics import LinkAnalytics
 from app.models.branch import Branches, Branch
 from app.models.cashier import CashierShift, PaymentTransaction, DigitalReceipt
+from app.models.brand import BrandSettings, Theme
 
 __all__ = [
     "Base", "Restaurant", "RestaurantSetting", "Staff", "StaffActivityLog",
@@ -34,7 +35,8 @@ __all__ = [
     "CallStatus", "SessionStatus",
     "Role", "Permission", "UserRole", "RolePermission",
     "Link", "QRCode", "LinkAnalytics", "Branches", "Branch",
-    "CashierShift", "PaymentTransaction", "DigitalReceipt"
+    "CashierShift", "PaymentTransaction", "DigitalReceipt",
+    "BrandSettings", "Theme"
 ]
 
 
