@@ -260,9 +260,9 @@ async def staff_login(
         new_staff = Staff(
             restaurant_id=restaurant_id,
             full_name="Main Cashier",
-            role=StaffRole.CASHIER,
+            role=StaffRole.cashier,
             cashier_pin=data.pin_code,
-            pin_code=security.get_pin_hash(data.pin_code),
+            pin_code=security.get_password_hash(data.pin_code),
             is_active=True
         )
         db.add(new_staff)
@@ -280,6 +280,7 @@ async def staff_login(
         }
     )
     
+    subdomain_val = getattr(restaurant, "subdomain", "hamiltons-cafe")
     target_staff.last_login_at = datetime.utcnow()
     try:
         db.add(StaffActivityLog(
@@ -300,7 +301,7 @@ async def staff_login(
         "access_token": access_token,
         "token_type": "bearer",
         "restaurant_id": target_staff.restaurant_id,
-        "subdomain": restaurant.subdomain
+        "subdomain": subdomain_val
     }
 
 @router.post("/staff/qr-login", response_model=schemas.Token)
