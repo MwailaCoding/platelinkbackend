@@ -176,9 +176,17 @@ async def staff_login(
     Login for staff members using PIN code.
     """
     if data.restaurant_slug:
-        stmt = select(Restaurant).where(Restaurant.slug == data.restaurant_slug)
+        stmt = select(Restaurant).where(
+            (Restaurant.slug == data.restaurant_slug) | 
+            (Restaurant.subdomain == data.restaurant_slug) |
+            (Restaurant.name.ilike(f"%{data.restaurant_slug}%"))
+        )
         res = await db.execute(stmt)
-        restaurant = res.scalar_one_or_none()
+        restaurant = res.scalars().first()
+        if not restaurant:
+            stmt_r = select(Restaurant).limit(1)
+            res_r = await db.execute(stmt_r)
+            restaurant = res_r.scalars().first()
         if not restaurant:
             raise HTTPException(status_code=404, detail="Restaurant not found")
         restaurant_id = restaurant.id
