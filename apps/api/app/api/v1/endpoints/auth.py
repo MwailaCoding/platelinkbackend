@@ -269,17 +269,6 @@ async def staff_login(
         await db.commit()
         await db.refresh(new_staff)
         target_staff = new_staff
-
-@router.get("/cashier/session")
-async def get_cashier_session(
-    db: AsyncSession = Depends(get_db)
-):
-    """Return current cashier session status."""
-    return {
-        "status": "active",
-        "is_active": True,
-        "terminal_id": "Terminal-Main"
-    }
     
     access_token = security.create_access_token(
         subject=target_staff.id,
@@ -657,3 +646,15 @@ async def auth_login_with_pin(
         },
         requires_pin_setup=False
     )
+
+@router.get("/cashier/session")
+async def get_cashier_session(
+    db: AsyncSession = Depends(get_db)
+):
+    """Return current cashier session status."""
+    return {
+        "status": "active",
+        "is_active": True,
+        "terminal_id": "Terminal-Main"
+    }
+
