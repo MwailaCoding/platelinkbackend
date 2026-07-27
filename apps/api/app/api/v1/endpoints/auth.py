@@ -220,7 +220,8 @@ async def staff_login(
     
     target_staff = None
     for s in staff_members:
-        if s.cashier_pin and s.cashier_pin == data.pin_code:
+        cashier_pin_val = getattr(s, 'cashier_pin', None)
+        if cashier_pin_val and cashier_pin_val == data.pin_code:
             target_staff = s
             break
         if s.pin_code:
@@ -239,7 +240,8 @@ async def staff_login(
         res_all = await db.execute(stmt_all)
         all_staff = res_all.scalars().all()
         for s in all_staff:
-            if s.cashier_pin and s.cashier_pin == data.pin_code:
+            cashier_pin_val = getattr(s, 'cashier_pin', None)
+            if cashier_pin_val and cashier_pin_val == data.pin_code:
                 target_staff = s
                 break
             if s.pin_code:
