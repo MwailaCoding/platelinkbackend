@@ -292,12 +292,20 @@ async def get_cashier_session(
     )
     
     target_staff.last_login_at = datetime.utcnow()
-    db.add(ActivityLog(
-        restaurant_id=target_staff.restaurant_id,
-        staff_id=target_staff.id,
-        action="staff_login"
-    ))
-    await db.commit()
+    try:
+        db.add(StaffActivityLog(
+            restaurant_id=target_staff.restaurant_id,
+            staff_id=target_staff.id,
+            clock_in_at=datetime.utcnow()
+        ))
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        try:
+            target_staff.last_login_at = datetime.utcnow()
+            await db.commit()
+        except Exception:
+            pass
     
     return {
         "access_token": access_token,
