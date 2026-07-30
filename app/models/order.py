@@ -44,6 +44,13 @@ class Order(Base):
     def table_number(self) -> Optional[int]:
         return self.table.table_number if self.table else None
 
+    @property
+    def estimated_ready_at(self) -> Optional[datetime]:
+        if not self.items:
+            return None
+        valid_times = [item.estimated_ready_at for item in self.items if item.estimated_ready_at is not None]
+        return max(valid_times) if valid_times else None
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any
 from datetime import datetime, timezone, timedelta
 
+from sqlalchemy.orm import selectinload
 from app.core.deps import get_db
 from app.models import Order, OrderItem, OrderStatus, KitchenStation
 from app.services.kitchen_routing import get_order_completion_status

@@ -204,15 +204,21 @@ async def accept_order(
     order.status = OrderStatus.preparing
     await db.commit()
     
+    est_ready = order.estimated_ready_at.isoformat() if order.estimated_ready_at else None
+
     # Broadcast to customer session
     await manager.broadcast(
-        {"type": "kitchen_accepted", "order_id": str(order_id)},
+        {"type": "kitchen_accepted", "order_id": str(order_id), "estimated_ready_at": est_ready},
         f"session_{order.session_id}"
     )
     # Broadcast to kitchen and waiters
     await manager.broadcast(
-        {"type": "order.status_updated", "order_id": str(order_id), "status": "preparing"},
+        {"type": "order.status_updated", "order_id": str(order_id), "status": "preparing", "estimated_ready_at": est_ready},
         str(restaurant_id)
+    )
+    await manager.broadcast(
+        {"type": "order.status_updated", "order_id": str(order_id), "status": "preparing", "estimated_ready_at": est_ready},
+        f"session_{order.session_id}"
     )
     return {"msg": "Order accepted"}
 
@@ -279,10 +285,7 @@ async def ready_item(
     item.ready_at = datetime.utcnow()
     
     # Check if all items in order are ready
-    order_res = await db.execute(
-        select(Order).options(selectinload(Order.table)).where(Order.id == order_id)
-    )
-    order = order_res.scalar_one_or_none()
+    order = await db.get(Order, order_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
         
@@ -310,11 +313,18 @@ async def ready_item(
         "table_number": order.table_number
     }
     
-    # Broadcast to station-specific room, generic kitchen room, and waiters
+    # Broadcast to station-specific room, generic kitchen room, waiters, and customer session
     await manager.broadcast(payload, f"{restaurant_id}_kitchen{station_suffix}")
     await manager.broadcast(payload, f"{restaurant_id}_kitchen")
     await manager.broadcast(payload, f"{restaurant_id}_waiters")
     await manager.broadcast(payload, f"{restaurant_id}_waiter")
+    if order.session_id:
+        await manager.broadcast(payload, f"session_{order.session_id}")
+        if order_is_ready:
+            await manager.broadcast(
+                {"type": "order.status_updated", "order_id": str(order_id), "status": "ready"},
+                f"session_{order.session_id}"
+            )
     
     return {"msg": "Item marked ready", "order_is_ready": order_is_ready}
 
@@ -341,6 +351,12 @@ async def complete_order(
     }
     await manager.broadcast(payload, f"{restaurant_id}_kitchen")
     await manager.broadcast(payload, f"{restaurant_id}_waiter")
+    if order.session_id:
+        await manager.broadcast(payload, f"session_{order.session_id}")
+        await manager.broadcast(
+            {"type": "order.status_updated", "order_id": str(order_id), "status": "completed"},
+            f"session_{order.session_id}"
+        )
     return {"msg": "Order completed"}
 
 

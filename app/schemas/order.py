@@ -48,6 +48,10 @@ class OrderItemRead(OrderItemBase):
     unit_price: Decimal
     subtotal: Decimal
     status: OrderStatus
+    estimated_ready_at: Optional[datetime] = None
+    estimated_start_at: Optional[datetime] = None
+    started_at: Optional[datetime] = None
+    ready_at: Optional[datetime] = None
 
 class OrderRead(BaseSchema):
     id: UUID
@@ -59,4 +63,5 @@ class OrderRead(BaseSchema):
     payment_status: PaymentStatus
     payment_method: Optional[PaymentMethod] = None
     created_at: datetime
+    estimated_ready_at: Optional[datetime] = None
     items: List[OrderItemRead] = []

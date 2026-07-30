@@ -1,6 +1,7 @@
 # app/api/v1/endpoints/customer.py
 from typing import List, Optional
 from datetime import datetime, timedelta
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
