@@ -34,7 +34,7 @@ class Order(Base):
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     restaurant: Mapped["Restaurant"] = relationship(back_populates="orders")
-    table: Mapped["Table"] = relationship(back_populates="orders")
+    table: Mapped["Table"] = relationship(back_populates="orders", lazy="selectin")
     session: Mapped["CustomerSession"] = relationship(back_populates="orders")
     staff: Mapped["Staff"] = relationship(back_populates="orders")
     items: Mapped[List["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan", lazy="selectin")
@@ -42,7 +42,9 @@ class Order(Base):
 
     @property
     def table_number(self) -> Optional[int]:
-        return self.table.table_number if self.table else None
+        if "table" in self.__dict__ and self.table:
+            return self.table.table_number
+        return None
 
     @property
     def estimated_ready_at(self) -> Optional[datetime]:

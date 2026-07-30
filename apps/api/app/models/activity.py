@@ -26,9 +26,11 @@ class WaiterCall(Base):
     acknowledged_by: Mapped[Optional[UUID]] = mapped_column(ForeignKey("staff.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     
-    table: Mapped["Table"] = relationship(back_populates="calls")
+    table: Mapped["Table"] = relationship(back_populates="calls", lazy="selectin")
 
     @property
     def table_number(self) -> Optional[int]:
-        return self.table.table_number if self.table else None
+        if "table" in self.__dict__ and self.table:
+            return self.table.table_number
+        return None
 
