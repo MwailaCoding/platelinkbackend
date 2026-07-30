@@ -85,14 +85,16 @@ class LinkService:
         return True
 
     async def get_staff_access_links(self, db: AsyncSession, restaurant_id: UUID) -> StaffAccessLinks:
-        """Get staff access URLs for waiter, kitchen, and cashier."""
+        """Get staff and application portal access URLs."""
         restaurant = await db.get(Restaurant, restaurant_id)
         sub = restaurant.subdomain if restaurant else "app"
 
         return StaffAccessLinks(
-            waiter=f"https://{sub}.platelink.africa/waiter",
-            kitchen=f"https://{sub}.platelink.africa/kitchen",
-            cashier=f"https://{sub}.platelink.africa/cashier"
+            customer=f"https://platelink-customer.vercel.app/{sub}",
+            cashier=f"https://platelink-cashier.vercel.app/{sub}",
+            kitchen=f"https://platelink-kitchen.vercel.app/{sub}/setup",
+            admin=f"https://platelink-admin.vercel.app/{sub}",
+            waiter=f"https://platelink-waiter.vercel.app/{sub}/login"
         )
 
     async def get_primary_link(self, db: AsyncSession, restaurant_id: UUID) -> Optional[Link]:

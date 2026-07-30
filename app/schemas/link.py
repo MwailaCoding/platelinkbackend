@@ -49,6 +49,8 @@ class CustomDomainResponse(BaseModel):
     status: str  # pending, verified, failed
 
 class StaffAccessLinks(BaseModel):
-    waiter: str
-    kitchen: str
+    customer: str
     cashier: str
+    kitchen: str
+    admin: str
+    waiter: str
