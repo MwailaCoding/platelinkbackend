@@ -102,9 +102,13 @@ async def start_session(data: schemas.SessionStart, db: AsyncSession = Depends(g
         payload = jwt.decode(data.qr_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         if payload.get("type") != "table":
             raise Exception("Token must be a table QR token")
-        table_id = payload.get("sub")
+        table_id_raw = payload.get("table_id") or payload.get("sub")
+        if not table_id_raw:
+            raise Exception("QR token missing table identifier")
+        table_id = UUID(str(table_id_raw)) if not isinstance(table_id_raw, UUID) else table_id_raw
         restaurant_id = payload.get("restaurant_id")
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error decoding QR token in start_session: {e}")
         raise HTTPException(status_code=400, detail="Invalid QR code")
         
     table = await db.get(Table, table_id)

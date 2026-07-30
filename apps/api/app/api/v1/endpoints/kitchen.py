@@ -18,17 +18,57 @@ from app.services.kitchen_routing import KitchenRoutingService
 router = APIRouter()
 
 
+def format_order_for_kitchen(order: Order) -> dict:
+    table_num = None
+    if getattr(order, "table", None) and getattr(order.table, "table_number", None) is not None:
+        table_num = order.table.table_number
+    elif getattr(order, "table_number", None) is not None:
+        table_num = order.table_number
+
+    formatted_items = []
+    for item in (order.items or []):
+        item_name = "Dish"
+        if getattr(item, "menu_item", None) and getattr(item.menu_item, "name", None):
+            item_name = item.menu_item.name
+        elif getattr(item, "name", None):
+            item_name = item.name
+
+        formatted_items.append({
+            "id": str(item.id),
+            "name": item_name,
+            "quantity": item.quantity,
+            "status": item.status.value if hasattr(item.status, "value") else str(item.status),
+            "special_instructions": getattr(item, "special_instructions", None),
+            "estimated_start_at": item.estimated_start_at.isoformat() if getattr(item, "estimated_start_at", None) else None,
+            "estimated_ready_at": item.estimated_ready_at.isoformat() if getattr(item, "estimated_ready_at", None) else None,
+            "start_delay_seconds": getattr(item, "start_delay_seconds", 0),
+            "is_held": getattr(item, "is_held", False),
+            "hold_reason": getattr(item, "hold_reason", None),
+            "hold_resume_at": item.hold_resume_at.isoformat() if getattr(item, "hold_resume_at", None) else None,
+            "station_id": str(getattr(item, "station_id", "")) if getattr(item, "station_id", None) else None,
+        })
+
+    return {
+        "id": str(order.id),
+        "order_number": order.order_number or str(order.id)[:8].upper(),
+        "table_number": table_num,
+        "order_type": "table" if table_num is not None else "takeaway",
+        "created_at": order.created_at.isoformat() if order.created_at else datetime.utcnow().isoformat(),
+        "started_at": order.started_at.isoformat() if getattr(order, "started_at", None) else None,
+        "status": order.status.value if hasattr(order.status, "value") else str(order.status),
+        "items": formatted_items,
+        "preparation_time": getattr(order, "preparation_time", 15),
+        "waiter_notes": getattr(order, "notes", None) or getattr(order, "waiter_notes", None),
+    }
+
 async def filter_orders_by_station(
     orders: List[Order],
     station_id: Optional[UUID],
     restaurant_id: UUID,
     db: AsyncSession
-) -> List[Order]:
+) -> List[dict]:
     """
     Helper function to filter orders and their items by kitchen station.
-    If station_id is provided, only orders containing items for that station are returned,
-    and their items list is filtered to only include items for that station.
-    Always populates item.station_id so the frontend can route/filter correctly in unified views.
     """
     routing_service = KitchenRoutingService(db)
     
@@ -37,10 +77,7 @@ async def filter_orders_by_station(
         for item in order.items:
             item.station_id = await routing_service.get_station_for_item(item.menu_item_id, restaurant_id)
 
-    if not station_id:
-        return orders
-
-    filtered_orders = []
+    formatted_orders = []
 
     for order in orders:
         station_items = []
@@ -49,16 +86,14 @@ async def filter_orders_by_station(
             if getattr(item, 'is_fired', True) == False:
                 continue
                 
-            if not station_id or item.station_id == station_id:
+            if not station_id or str(item.station_id) == str(station_id):
                 station_items.append(item)
         
         if station_items:
-            # Create a shallow copy of order to avoid modifying DB session state directly
-            order_copy = order
-            order_copy.items = station_items
-            filtered_orders.append(order_copy)
+            order.items = station_items
+            formatted_orders.append(format_order_for_kitchen(order))
 
-    return filtered_orders
+    return formatted_orders
 
 
 @router.get("/restaurants")
@@ -96,7 +131,10 @@ async def get_new_orders(
     """
     Orders waiting to be accepted by kitchen, filtered by station.
     """
-    stmt = select(Order).where(
+    stmt = select(Order).options(
+        selectinload(Order.table),
+        selectinload(Order.items).selectinload(OrderItem.menu_item)
+    ).where(
         Order.restaurant_id == restaurant_id,
         Order.status == OrderStatus.received
     ).order_by(Order.created_at.asc())
@@ -115,7 +153,10 @@ async def get_in_progress_orders(
     """
     Orders in progress (cooking) in the kitchen, filtered by station.
     """
-    stmt = select(Order).where(
+    stmt = select(Order).options(
+        selectinload(Order.table),
+        selectinload(Order.items).selectinload(OrderItem.menu_item)
+    ).where(
         Order.restaurant_id == restaurant_id,
         Order.status == OrderStatus.preparing
     ).order_by(Order.created_at.asc())
@@ -134,7 +175,10 @@ async def get_ready_orders(
     """
     Orders marked as ready (cooked/dispatching) in the kitchen, filtered by station.
     """
-    stmt = select(Order).where(
+    stmt = select(Order).options(
+        selectinload(Order.table),
+        selectinload(Order.items).selectinload(OrderItem.menu_item)
+    ).where(
         Order.restaurant_id == restaurant_id,
         Order.status == OrderStatus.ready
     ).order_by(Order.created_at.desc())

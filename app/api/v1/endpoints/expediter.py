@@ -25,7 +25,10 @@ async def get_expediter_orders(
     """
     Get all active orders with completion status for expediter view.
     """
-    stmt = select(Order).where(
+    stmt = select(Order).options(
+        selectinload(Order.table),
+        selectinload(Order.items).selectinload(OrderItem.menu_item)
+    ).where(
         Order.restaurant_id == restaurant_id,
         Order.status.in_([OrderStatus.received, OrderStatus.preparing, OrderStatus.ready])
     ).order_by(Order.created_at.asc())

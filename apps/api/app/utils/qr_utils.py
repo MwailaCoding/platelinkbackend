@@ -12,8 +12,9 @@ def generate_qr_token(table_id: str, restaurant_id: str) -> str:
     """
     payload = {
         "type": "table",
-        "restaurant_id": str(restaurant_id),
+        "sub": str(table_id),
         "table_id": str(table_id),
+        "restaurant_id": str(restaurant_id),
         "exp": datetime.utcnow() + timedelta(days=3650)
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")

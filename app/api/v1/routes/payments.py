@@ -702,6 +702,69 @@ async def confirm_cash_payment(
         }
 
 
+@router.get("/transactions/all")
+async def get_all_transactions(
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get all payment transactions for cashier dashboard (including customer online STK push and POS payments).
+    """
+    stmt = select(Payment).order_by(Payment.created_at.desc())
+    res = await db.execute(stmt)
+    payments = res.scalars().all()
+    
+    output = []
+    for p in payments:
+        order = await db.get(Order, p.order_id)
+        table_num = "N/A"
+        order_num = str(p.order_id)[:6]
+        phone = None
+        
+        if order:
+            order_num = order.order_number or str(order.id)[:6]
+            if order.table_id:
+                table_num = str(order.table_id)[:4]
+                
+            if order.session_id:
+                session = await db.get(CustomerSession, order.session_id)
+                if session and session.customer_phone:
+                    phone = session.customer_phone
+
+        # Fallback check MpesaTransaction if phone is missing
+        if not phone and p.transaction_id:
+            stmt_tx = select(MpesaTransaction).where(MpesaTransaction.checkout_request_id == p.transaction_id)
+            tx_res = await db.execute(stmt_tx)
+            tx = tx_res.scalar_one_or_none()
+            if tx and tx.phone_number:
+                phone = tx.phone_number
+
+        is_customer = p.cashier_id is None or p.payment_method == PaymentMethod.mpesa
+        source = "customer_online" if is_customer else "cashier_pos"
+
+        output.append({
+            "id": str(p.id),
+            "order_id": str(p.order_id),
+            "order_number": order_num,
+            "table_number": table_num,
+            "amount": float(p.amount),
+            "method": p.payment_method.value if hasattr(p.payment_method, "value") else str(p.payment_method),
+            "status": "completed" if p.status == PaymentStatus.paid else (p.status.value if hasattr(p.status, "value") else str(p.status)),
+            "source": source,
+            "reference": p.transaction_id,
+            "mpesa_receipt": p.mpesa_receipt_number or p.transaction_id,
+            "mpesa_phone": phone,
+            "card_reference": p.transaction_id if p.payment_method == PaymentMethod.card else None,
+            "cash_received": float(p.cash_received) if p.cash_received else None,
+            "cash_change": float(p.change_given) if p.change_given else None,
+            "processed_by": "Cashier" if source == "cashier_pos" else "Customer Online",
+            "processed_at": p.created_at.isoformat() if p.created_at else datetime.utcnow().isoformat(),
+            "settled_at": p.completed_at.isoformat() if p.completed_at else (p.created_at.isoformat() if p.created_at else datetime.utcnow().isoformat()),
+            "notes": getattr(p, "mpesa_result_description", None)
+        })
+        
+    return output
+
+
 # =============================================================================
 # ADDITIONAL PAYMENTS (POST-PAYMENT ADD-ONS)
 # =============================================================================
